@@ -14,6 +14,8 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeDefault(req, res)
     case '/counter':
       return writeCounter(req, res)
+    case '/end-after-one':
+      return writeOne(req, res)
     default:
       return writeFallback(req, res)
   }
@@ -54,6 +56,28 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
       })
     )
     await delay(25)
+  }
+
+  res.end()
+}
+
+function writeOne(req: IncomingMessage, res: ServerResponse) {
+  const last = getLastEventId(req)
+  res.writeHead(last ? 204 : 200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  if (!last) {
+    res.write(formatEvent({retry: 50, data: ''}))
+    res.write(
+      formatEvent({
+        event: 'progress',
+        data: '100%',
+        id: 'prct-100',
+      })
+    )
   }
 
   res.end()

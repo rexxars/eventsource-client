@@ -40,6 +40,13 @@ export const OPEN = 1
 export const CLOSED = 2
 
 /**
+ * Intentional noop function for eased control flow
+ */
+const noop = () => {
+  /* intentional noop */
+}
+
+/**
  * Creates a new EventSource client. Used internally by the environment-specific entry points,
  * and should not be used directly by consumers.
  *
@@ -52,7 +59,7 @@ export function createEventSource(
   options: EventSourceOptions,
   {getStream, getTextDecoderStream}: EnvAbstractions
 ): EventSourceClient {
-  const {onMessage} = options
+  const {onMessage, onDisconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent using modified object later
   const parser = createParser(onParsedMessage)
@@ -122,8 +129,11 @@ export function createEventSource(
       throw new Error('Missing response body')
     }
 
+    // HTTP 204 means "close the connection, no more data will be sent"
     if (status === 204) {
-      // @todo read spec and figure out what is supposed to happen here
+      onDisconnect()
+      close()
+      return
     }
 
     if (redirected) {
@@ -150,9 +160,7 @@ export function createEventSource(
       open = false
       request = null
 
-      if (options.onDisconnect) {
-        options.onDisconnect()
-      }
+      onDisconnect()
 
       // EventSources never close unless explicitly handled with `.close()`:
       // Implementors should send an `done`/`complete`/`disconnect` event and
