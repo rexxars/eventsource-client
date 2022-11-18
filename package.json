@@ -1,0 +1,121 @@
+{
+  "name": "eventsource-client",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Modern EventSource client for browsers and Node.js",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "source": "./src/default/index.ts",
+  "main": "./dist/index.node.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "source": "./src/default/index.ts",
+      "types": "./dist/index.d.ts",
+      "node": {
+        "source": "./src/node/index.ts",
+        "import": "./dist/index.node.js",
+        "require": "./dist/index.node.cjs"
+      },
+      "require": "./dist/index.node.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pkg-utils build --tsconfig tsconfig.dist.json",
+    "clean": "rimraf dist coverage",
+    "coverage": "jest --coverage",
+    "lint": "eslint . && tsc --noEmit",
+    "posttest": "npm run lint",
+    "prebuild": "npm run clean",
+    "prepublishOnly": "npm run build",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/rexxars/eventsource-client.git"
+  },
+  "keywords": [
+    "sse",
+    "eventsource",
+    "server-sent-events"
+  ],
+  "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.5.0"
+  },
+  "dependencies": {
+    "destroy": "^1.2.0",
+    "eventsource-parser": "^0.0.3"
+  },
+  "devDependencies": {
+    "@sanity/pkg-utils": "^1.10.0",
+    "@types/destroy": "^1.0.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.5.1",
+    "@types/node": "^18.8.0",
+    "@types/node-fetch": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-sanity": "^5.1.0",
+    "jest": "^28.1.0",
+    "node-fetch": "^2.0.0",
+    "prettier": "^2.5.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.2",
+    "typescript": "^4.5.4",
+    "undici": "^5.10.0"
+  },
+  "bugs": {
+    "url": "https://github.com/rexxars/eventsource-client/issues"
+  },
+  "homepage": "https://github.com/rexxars/eventsource-client#readme",
+  "prettier": {
+    "semi": false,
+    "printWidth": 100,
+    "bracketSpacing": false,
+    "singleQuote": true
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 9,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "modules": true
+      }
+    },
+    "extends": [
+      "sanity",
+      "sanity/typescript",
+      "prettier"
+    ],
+    "ignorePatterns": [
+      "lib/**/"
+    ],
+    "globals": {
+      "globalThis": false
+    },
+    "rules": {
+      "no-undef": "off"
+    }
+  },
+  "jest": {
+    "clearMocks": true,
+    "preset": "ts-jest",
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageProvider": "v8",
+    "coverageReporters": [
+      "lcov"
+    ]
+  }
+}
