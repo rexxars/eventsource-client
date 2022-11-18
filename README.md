@@ -52,6 +52,10 @@ es.close()
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Redirect handling
+- [ ] Custom HTTP method
+- [ ] Request body
+- [ ] Custom headers
+- [ ] `withCredentials` support (browser)
 
 ## License
 
