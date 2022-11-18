@@ -1,6 +1,6 @@
 # eventsource-client
 
-[![npm version](https://img.shields.io/npm/v/eventsource-client.svg?style=flat-square)](http://browsenpm.org/package/eventsource-client)[![npm bundle size](https://img.shields.io/bundlephobia/minzip/eventsource-client?style=flat-square)](https://bundlephobia.com/result?p=eventsource-client)
+[![npm version](https://img.shields.io/npm/v/eventsource-client.svg?style=flat-square)](http://npmjs.org/package/eventsource-client)[![npm bundle size](https://img.shields.io/bundlephobia/minzip/eventsource-client?style=flat-square)](https://bundlephobia.com/result?p=eventsource-client)
 
 A modern, streaming client for [server-sent events/eventsource](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events).
 
