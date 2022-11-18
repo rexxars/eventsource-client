@@ -138,6 +138,8 @@ export function createEventSource(
     const reader = stream.getReader()
     let open = true
 
+    readyState = OPEN
+
     do {
       const {done, value} = await reader.read()
       if (!done) {
