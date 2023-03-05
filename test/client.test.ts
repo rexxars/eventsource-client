@@ -112,7 +112,7 @@ test('can pass an initial last received event id', async () => {
   })
 })
 
-test.only('will close stream on HTTP 204', async () => {
+test('will close stream on HTTP 204', async () => {
   const onMessage = getCallCounter()
   const onDisconnect = getCallCounter()
   es = createEventSource({

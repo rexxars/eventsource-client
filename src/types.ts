@@ -1,3 +1,5 @@
+import type {ReadableStream as NodeWebReadableStream} from 'node:stream/web'
+
 /**
  * Ready state for a connection (0 = connecting, 1 = open, 2 = closed).
  *
@@ -144,7 +146,7 @@ export interface FetchLikeInit {
  * @public
  */
 export interface FetchLikeResponse {
-  readonly body: ReadableStream<Uint8Array> | NodeJS.ReadableStream | null
+  readonly body: NodeJS.ReadableStream | NodeWebReadableStream<any> | Response['body'] | null
   readonly url: string
   readonly status: number
   readonly redirected: boolean

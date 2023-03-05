@@ -1,4 +1,5 @@
 import {createParser, type ParseEvent} from 'eventsource-parser'
+import type {EnvAbstractions} from './abstractions'
 import type {
   EventSourceClient,
   EventSourceOptions,
@@ -7,17 +8,6 @@ import type {
   FetchLikeResponse,
   ReadyState,
 } from './types'
-
-/**
- * Internal abstractions over environment-specific APIs, to keep node-specifics
- * out of browser bundles and vice versa.
- *
- * @internal
- */
-export interface EnvAbstractions {
-  getStream(body: NodeJS.ReadableStream | ReadableStream): ReadableStream<Uint8Array>
-  getTextDecoderStream(encoding: 'utf-8'): TextDecoderStream
-}
 
 // ReadyStates, mirrors WhatWG spec.
 
@@ -141,10 +131,11 @@ export function createEventSource(
     }
 
     // Ensure that the response stream is a web stream
-    const bodyStream = getStream(body)
+    // @todo Figure out a way to make this work without casting
+    const bodyStream = getStream(body) as ReadableStream<Uint8Array>
 
     // EventSources are always UTF-8 per spec
-    const stream = bodyStream.pipeThrough(getTextDecoderStream('utf-8'))
+    const stream = bodyStream.pipeThrough<string>(getTextDecoderStream('utf-8'))
     const reader = stream.getReader()
     let open = true
 
@@ -214,7 +205,7 @@ function validate(options: EventSourceOptions): {
   initialLastEventId: string | undefined
 } {
   const fetch = options.fetch || globalThis.fetch
-  if (!fetch) {
+  if (!isFetchLike(fetch)) {
     throw new Error('No fetch implementation provided, and one was not found on the global object.')
   }
 
@@ -233,4 +224,9 @@ function validate(options: EventSourceOptions): {
   }
 
   return {fetch, url, initialLastEventId}
+}
+
+// This is obviously naive, but hard to probe for full compatibility
+function isFetchLike(fetch: FetchLike | typeof globalThis.fetch): fetch is FetchLike {
+  return typeof fetch === 'function'
 }

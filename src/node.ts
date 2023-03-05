@@ -1,11 +1,15 @@
 import {Readable, finished} from 'node:stream'
-import {TextDecoderStream, ReadableStream} from 'node:stream/web'
+import {
+  TextDecoderStream as NodeWebTextDecoderStream,
+  ReadableStream as NodeWebReadableStream,
+} from 'node:stream/web'
 import destroy from 'destroy'
 
-import {createEventSource as createSource, EnvAbstractions} from '../client'
-import type {EventSourceClient, EventSourceOptions} from '../types'
+import {createEventSource as createSource} from './client'
+import type {EventSourceClient, EventSourceOptions} from './types'
+import type {EnvAbstractions} from './abstractions'
 
-export * from '../types'
+export * from './types'
 
 const nodeAbstractions: EnvAbstractions = {
   getStream,
@@ -32,8 +36,15 @@ export function createEventSource(options: EventSourceOptions): EventSourceClien
  * @returns A ReadableStream
  * @private
  */
-function getStream(body: NodeJS.ReadableStream | ReadableStream): ReadableStream<Uint8Array> {
+function getStream(
+  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array>
+): NodeWebReadableStream<Uint8Array>
+function getStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array>
+function getStream(
+  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array>
+): NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array> {
   if ('getReader' in body) {
+    // Already a web stream
     return body
   }
 
@@ -41,11 +52,12 @@ function getStream(body: NodeJS.ReadableStream | ReadableStream): ReadableStream
     throw new Error('Invalid response body, expected a web or node.js stream')
   }
 
+  // Available as of Node 17
   if (typeof Readable.toWeb === 'function') {
     return Readable.toWeb(Readable.from(body))
   }
 
-  const streamReadable = body as NodeJS.ReadableStream
+  const streamReadable = body
 
   let controller: ReadableStreamController<Uint8Array>
 
@@ -86,7 +98,7 @@ function getStream(body: NodeJS.ReadableStream | ReadableStream): ReadableStream
     }
   })
 
-  return new ReadableStream(
+  return new NodeWebReadableStream<Uint8Array>(
     {
       start(ctrl) {
         controller = ctrl
@@ -112,7 +124,8 @@ function getStream(body: NodeJS.ReadableStream | ReadableStream): ReadableStream
  * @private
  */
 function getTextDecoderStream(encoding: 'utf-8'): TextDecoderStream {
-  return new TextDecoderStream(encoding)
+  // @todo See if there is any way around the casting here
+  return new NodeWebTextDecoderStream(encoding) as unknown as TextDecoderStream
 }
 
 // Node uses an AbortError that isn't exactly the same as the DOMException

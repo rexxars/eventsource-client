@@ -1,29 +1,28 @@
 {
   "name": "eventsource-client",
-  "type": "module",
   "version": "0.0.0",
   "description": "Modern EventSource client for browsers and Node.js",
   "sideEffects": false,
-  "types": "./dist/index.d.ts",
-  "source": "./src/default/index.ts",
-  "main": "./dist/index.node.cjs",
-  "module": "./dist/index.js",
+  "types": "./dist/default.d.ts",
+  "source": "./src/default.ts",
+  "module": "./dist/default.esm.js",
+  "main": "./dist/default.js",
   "exports": {
     ".": {
-      "source": "./src/default/index.ts",
-      "types": "./dist/index.d.ts",
+      "types": "./dist/default.d.ts",
+      "source": "./src/default.ts",
+      "require": "./dist/default.js",
       "node": {
-        "source": "./src/node/index.ts",
-        "import": "./dist/index.node.js",
-        "require": "./dist/index.node.cjs"
+        "import": "./dist/node.cjs.mjs",
+        "require": "./dist/node.js"
       },
-      "require": "./dist/index.node.cjs",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
+      "import": "./dist/default.esm.js",
+      "default": "./dist/default.esm.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pkg-utils build --tsconfig tsconfig.dist.json",
+    "build": "pkg-utils build && pkg-utils --strict",
     "clean": "rimraf dist coverage",
     "coverage": "jest --coverage",
     "lint": "eslint . && tsc --noEmit",
@@ -44,18 +43,18 @@
   "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=16.5.0"
+    "node": ">=16.6.0"
   },
   "dependencies": {
     "destroy": "^1.2.0",
-    "eventsource-parser": "^0.0.3"
+    "eventsource-parser": "^0.1.0"
   },
   "devDependencies": {
-    "@sanity/pkg-utils": "^1.18.0",
+    "@sanity/pkg-utils": "^2.2.3",
     "@types/destroy": "^1.0.0",
     "@types/express": "^4.17.14",
     "@types/jest": "^27.5.2",
-    "@types/node": "^18.11.9",
+    "@types/node": "^18.0.0",
     "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
@@ -65,9 +64,10 @@
     "jest": "^28.1.3",
     "node-fetch": "^2.6.7",
     "prettier": "^2.7.1",
-    "rimraf": "^3.0.2",
+    "rimraf": "^4.1.2",
+    "rollup-plugin-visualizer": "^5.9.0",
     "ts-jest": "^28.0.8",
-    "typescript": "4.7.4",
+    "typescript": "^4.9.5",
     "undici": "^5.12.0"
   },
   "bugs": {
