@@ -26,6 +26,16 @@ Yes! There are indeed lots of different EventSource clients and polyfills out th
 npm install --save eventsource-client
 ```
 
+## Supported engines
+
+- Node.js >= 16.6
+- Chrome >= 71
+- Safari >= 14.1
+- Firefox >= 105
+- Edge >= 79
+
+Basically, any environment that supports the [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) (with [pipeThrough](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream/pipeThrough) support) and the [TextDecoderStream](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoderStream) APIs.
+
 ## Usage
 
 ```ts
@@ -56,6 +66,9 @@ es.close()
 - [ ] Request body
 - [ ] Custom headers
 - [ ] `withCredentials` support (browser)
+- [ ] Deno support/tests
+- [ ] Bun support/tests
+- [ ] Consider legacy build
 
 ## License
 

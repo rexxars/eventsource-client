@@ -1,10 +1,13 @@
-import {createServer, IncomingMessage, Server, ServerResponse} from 'http'
+import {createReadStream} from 'node:fs'
+import {resolve as resolvePath} from 'node:path'
+import {createServer, type IncomingMessage, type Server, type ServerResponse} from 'node:http'
+import esbuild from 'esbuild'
 
-export function getServer(): Promise<Server> {
+export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer(onRequest)
       .on('error', reject)
-      .listen(3945, '127.0.0.1', () => resolve(server))
+      .listen(port, '127.0.0.1', () => resolve(server))
   })
 }
 
@@ -16,12 +19,16 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeCounter(req, res)
     case '/end-after-one':
       return writeOne(req, res)
+    case '/browser-test':
+      return writeBrowserTestPage(req, res)
+    case '/browser-test.js':
+      return writeBrowserTestScript(req, res)
     default:
       return writeFallback(req, res)
   }
 }
 
-function writeDefault(req: IncomingMessage, res: ServerResponse) {
+function writeDefault(_req: IncomingMessage, res: ServerResponse) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -83,7 +90,7 @@ function writeOne(req: IncomingMessage, res: ServerResponse) {
   res.end()
 }
 
-function writeFallback(req: IncomingMessage, res: ServerResponse) {
+function writeFallback(_req: IncomingMessage, res: ServerResponse) {
   res.writeHead(404, {
     'Content-Type': 'text/plain',
     'Cache-Control': 'no-cache',
@@ -91,6 +98,36 @@ function writeFallback(req: IncomingMessage, res: ServerResponse) {
   })
 
   res.write('File not found')
+  res.end()
+}
+
+function writeBrowserTestPage(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-cache',
+    Connection: 'close',
+  })
+
+  createReadStream(resolvePath(__dirname, './browser/browser-test.html')).pipe(res)
+}
+
+async function writeBrowserTestScript(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/javascript; charset=utf-8',
+    'Cache-Control': 'no-cache',
+    Connection: 'close',
+  })
+
+  const build = await esbuild.build({
+    bundle: true,
+    target: ['chrome71', 'edge79', 'firefox105', 'safari14.1'],
+    entryPoints: [resolvePath(__dirname, './browser/browser-test.ts')],
+    sourcemap: 'inline',
+    write: false,
+    outdir: 'out',
+  })
+
+  res.write(build.outputFiles.map((file) => file.text).join('\n\n'))
   res.end()
 }
 

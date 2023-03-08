@@ -1,7 +1,9 @@
 /test
+/dist/stats.html
 .editorconfig
 .eslintignore
 .gitignore
+.github
 package.config.ts
 tsconfig.dist.json
 tsconfig.json

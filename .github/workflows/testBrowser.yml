@@ -1,0 +1,32 @@
+name: Browser tests
+on:
+  push:
+jobs:
+  testBrowser:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Cache node modules
+      id: cache-node-modules
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-modules-${{ env.cache-name }}-
+          ${{ runner.os }}-modules-
+          ${{ runner.os }}-
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm ci
+    - name: Install Playwright Browsers
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npx playwright install --with-deps
+    - name: Run browser tests
+      run: npm run test:browser
