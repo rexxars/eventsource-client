@@ -30,7 +30,7 @@ export function createEventSource(
   options: EventSourceOptions,
   {getStream, getTextDecoderStream}: EnvAbstractions
 ): EventSourceClient {
-  const {onMessage, onDisconnect = noop} = options
+  const {onMessage, onConnect = noop, onDisconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent using modified object later
   const parser = createParser(onParsedMessage)
@@ -95,6 +95,8 @@ export function createEventSource(
   }
 
   async function onFetchResponse(response: FetchLikeResponse) {
+    onConnect()
+
     const {body, redirected, status} = response
     if (!body) {
       throw new Error('Missing response body')
