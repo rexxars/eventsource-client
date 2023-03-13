@@ -4,6 +4,7 @@ import type {EventSourceClient, EventSourceOptions} from './types'
 import {createEventSource as createSource} from './client'
 
 export * from './types'
+export * from './constants'
 
 /**
  * Default "abstractions", eg when all the APIs are globally available

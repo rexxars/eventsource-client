@@ -10,6 +10,7 @@ import type {EventSourceClient, EventSourceOptions} from './types'
 import type {EnvAbstractions} from './abstractions'
 
 export * from './types'
+export * from './constants'
 
 const nodeAbstractions: EnvAbstractions = {
   getStream,

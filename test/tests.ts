@@ -2,6 +2,7 @@ import sinon from 'sinon'
 import type NodeFetch from 'node-fetch'
 
 import type {createEventSource as CreateEventSourceFn} from '../src/default'
+import {OPEN, CONNECTING, CLOSED} from '../src/constants'
 import {expect, deferClose, getCallCounter} from './helpers'
 import {TestRunner} from './waffletest'
 
@@ -53,11 +54,11 @@ export function registerTests(options: {
 
     // While still receiving messages (we receive 3 at a time before it disconnects)
     await onMessage.waitForCallCount(1)
-    expect(es.readyState).toBe(1) // OPEN
+    expect(es.readyState).toBe(OPEN) // Open (connected)
 
     // While waiting for reconnect (after 3 messages it will disconnect and reconnect)
     await onDisconnect.waitForCallCount(1)
-    expect(es.readyState).toBe(0) // RECONNECTING
+    expect(es.readyState).toBe(CONNECTING) // Connecting (reconnecting)
     expect(onMessage.callCount).toBe(3)
 
     // Will reconnect infinitely, stop at 8 messages
@@ -136,7 +137,7 @@ export function registerTests(options: {
     await onMessage.waitForCallCount(1)
 
     expect(es.lastEventId).toBe('prct-100')
-    expect(es.readyState).toBe(2) // CLOSED
+    expect(es.readyState).toBe(CLOSED) // CLOSED
     expect(onMessage.callCount).toBe(1)
     expect(onMessage.lastCall.lastArg).toMatchObject({
       data: '100%',

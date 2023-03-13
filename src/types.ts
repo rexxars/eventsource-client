@@ -1,11 +1,11 @@
 import type {ReadableStream as NodeWebReadableStream} from 'node:stream/web'
 
 /**
- * Ready state for a connection (0 = connecting, 1 = open, 2 = closed).
+ * Ready state for a connection.
  *
  * @public
  */
-export type ReadyState = 0 | 1 | 2
+export type ReadyState = 'open' | 'connecting' | 'closed'
 
 /**
  * EventSource client.
@@ -25,7 +25,7 @@ export interface EventSourceClient {
   /** Current URL. Usually the same as `url`, but in the case of allowed redirects, it will reflect the new URL. */
   readonly url: string
 
-  /** Ready state of the connection (0 = connecting, 1 = open, 2 = closed). */
+  /** Ready state of the connection */
   readonly readyState: ReadyState
 }
 

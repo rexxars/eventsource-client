@@ -1,4 +1,5 @@
 import {createParser, type ParseEvent} from 'eventsource-parser'
+import {CLOSED, CONNECTING, OPEN} from './constants'
 import type {EnvAbstractions} from './abstractions'
 import type {
   EventSourceClient,
@@ -8,26 +9,6 @@ import type {
   FetchLikeResponse,
   ReadyState,
 } from './types'
-
-// ReadyStates, mirrors WhatWG spec.
-
-/**
- * ReadyState representing a connection that is connecting or has been scheduled to reconnect.
- * @public
- */
-export const CONNECTING = 0
-
-/**
- * ReadyState representing a connection that is open, eg connected.
- * @public
- */
-export const OPEN = 1
-
-/**
- * ReadyState representing a connection that has been closed (manually, or due to an error).
- * @public
- */
-export const CLOSED = 2
 
 /**
  * Intentional noop function for eased control flow
