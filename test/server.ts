@@ -13,16 +13,23 @@ export function getServer(port: number): Promise<Server> {
 
 function onRequest(req: IncomingMessage, res: ServerResponse) {
   switch (req.url) {
+    // Server-Sent Event endpoints
     case '/':
       return writeDefault(req, res)
     case '/counter':
       return writeCounter(req, res)
     case '/end-after-one':
       return writeOne(req, res)
+    case '/slow-connect':
+      return writeSlowConnect(req, res)
+
+    // Browser test endpoints (HTML/JS)
     case '/browser-test':
       return writeBrowserTestPage(req, res)
     case '/browser-test.js':
       return writeBrowserTestScript(req, res)
+
+    // Fallback, eg 404
     default:
       return writeFallback(req, res)
   }
@@ -86,6 +93,25 @@ function writeOne(req: IncomingMessage, res: ServerResponse) {
       })
     )
   }
+
+  res.end()
+}
+
+async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
+  await delay(200)
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  res.write(
+    formatEvent({
+      event: 'welcome',
+      data: 'That was a slow connect, was it not?',
+    })
+  )
 
   res.end()
 }

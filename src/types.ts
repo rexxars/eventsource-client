@@ -44,6 +44,7 @@ export interface EventSourceOptions {
   /** Callback that fires each time the connection is established (multiple times in the case of reconnects). */
   onConnect?: () => void
 
+  /** Callback that fires each time the connection is broken (will still attempt to reconnect, unless `close()` is called). */
   onDisconnect?: () => void
 
   /** A string to use for the initial `Last-Event-ID` header when connecting. Only used until the first message with a new ID is received. */

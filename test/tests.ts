@@ -76,6 +76,35 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('will have correct ready state throughout lifecycle', async () => {
+    const onMessage = getCallCounter()
+    const onConnect = getCallCounter()
+    const onDisconnect = getCallCounter()
+    const url = `${baseUrl}:${port}/slow-connect`
+    const es = createEventSource({
+      url,
+      fetch,
+      onMessage,
+      onConnect,
+      onDisconnect,
+    })
+
+    // Connecting
+    expect(es.readyState).toBe(CONNECTING)
+
+    // Connected
+    await onConnect.waitForCallCount(1)
+    expect(es.readyState).toBe(OPEN)
+
+    // Disconnected
+    await onDisconnect.waitForCallCount(1)
+    expect(es.readyState).toBe(CONNECTING)
+
+    // Closed
+    await es.close()
+    expect(es.readyState).toBe(CLOSED)
+  })
+
   test('calling connect while already connected does nothing', async () => {
     const onMessage = getCallCounter()
     const es = createEventSource({
