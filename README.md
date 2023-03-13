@@ -59,6 +59,7 @@ es.close()
 
 ## Todo
 
+- [ ] Figure out what to do on broken connection on request body
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Redirect handling

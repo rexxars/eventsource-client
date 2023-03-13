@@ -1,4 +1,3 @@
-import sinon from 'sinon'
 import type NodeFetch from 'node-fetch'
 
 import type {createEventSource as CreateEventSourceFn} from '../src/default'
@@ -26,8 +25,6 @@ export function registerTests(options: {
       fetch,
       onMessage,
     })
-
-    sinon.fake()
 
     await onMessage.waitForCallCount(1)
 
@@ -173,6 +170,31 @@ export function registerTests(options: {
       event: 'progress',
       id: 'prct-100',
     })
+
+    await deferClose(es)
+  })
+
+  test('can send plain-text string data as POST request with headers', async () => {
+    const onMessage = getCallCounter()
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/debug`),
+      method: 'POST',
+      body: 'Blåbærsyltetøy, rømme og brunost på vaffel',
+      headers: {'Content-Type': 'text/norwegian-plain; charset=utf-8'},
+      fetch,
+      onMessage,
+    })
+
+    await onMessage.waitForCallCount(1)
+    expect(onMessage.callCount).toBe(1)
+
+    const lastMessage = onMessage.lastCall.lastArg
+    expect(lastMessage.event).toBe('debug')
+
+    const data = JSON.parse(lastMessage.data)
+    expect(data.method).toBe('POST')
+    expect(data.bodyHash).toBe('5f4e50479bfc5ccdb6f865cc3341245dde9e81aa2f36b0c80e3fcbcfbeccaeda')
+    expect(data.headers).toMatchObject({'content-type': 'text/norwegian-plain; charset=utf-8'})
 
     await deferClose(es)
   })

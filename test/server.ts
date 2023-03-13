@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto'
 import {createReadStream} from 'node:fs'
 import {resolve as resolvePath} from 'node:path'
 import {createServer, type IncomingMessage, type Server, type ServerResponse} from 'node:http'
@@ -22,6 +23,8 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeOne(req, res)
     case '/slow-connect':
       return writeSlowConnect(req, res)
+    case '/debug':
+      return writeDebug(req, res)
 
     // Browser test endpoints (HTML/JS)
     case '/browser-test':
@@ -110,6 +113,44 @@ async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'welcome',
       data: 'That was a slow connect, was it not?',
+    })
+  )
+
+  res.end()
+}
+
+async function writeDebug(req: IncomingMessage, res: ServerResponse) {
+  const hash = new Promise<string>((resolve, reject) => {
+    const bodyHash = createHash('sha256')
+    req.on('error', reject)
+    req.on('data', (chunk) => bodyHash.update(chunk))
+    req.on('end', () => resolve(bodyHash.digest('hex')))
+  })
+
+  let bodyHash: string
+  try {
+    bodyHash = await hash
+  } catch (err: unknown) {
+    res.writeHead(500, 'Internal Server Error')
+    res.write(err instanceof Error ? err.message : `${err}`)
+    res.end()
+    return
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  res.write(
+    formatEvent({
+      event: 'debug',
+      data: JSON.stringify({
+        method: req.method,
+        headers: req.headers,
+        bodyHash,
+      }),
     })
   )
 
