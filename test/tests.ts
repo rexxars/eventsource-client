@@ -73,6 +73,48 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('can use async iterator, reconnects transparently', async () => {
+    const onDisconnect = getCallCounter()
+    const url = `${baseUrl}:${port}/counter`
+    const es = createEventSource({
+      url,
+      fetch,
+      onDisconnect,
+    })
+
+    let numMessages = 1
+    for await (const event of es) {
+      expect(event.event).toBe('counter')
+      expect(event.data).toBe(`Counter is at ${numMessages}`)
+      expect(event.id).toBe(`${numMessages}`)
+
+      // Will reconnect infinitely, stop at 11 messages
+      if (++numMessages === 11) {
+        break
+      }
+    }
+
+    expect(onDisconnect.callCount).toBe(3)
+    await deferClose(es)
+  })
+
+  test('async iterator breaks out of loop without error when calling `close()`', async () => {
+    const url = `${baseUrl}:${port}/counter`
+    const es = createEventSource({
+      url,
+      fetch,
+    })
+
+    let hasSeenMessage = false
+    for await (const {event} of es) {
+      hasSeenMessage = true
+      expect(event).toBe('counter')
+      es.close()
+    }
+
+    expect(hasSeenMessage).toBe(true)
+  })
+
   test('will have correct ready state throughout lifecycle', async () => {
     const onMessage = getCallCounter()
     const onConnect = getCallCounter()

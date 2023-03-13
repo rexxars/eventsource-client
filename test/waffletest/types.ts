@@ -11,10 +11,19 @@ export interface TestReporter {
 // Equal for now, but might extend
 export type TestRunnerOptions = TestReporter
 
+export type RegisterTest = ((
+  title: string,
+  fn: TestFn,
+  timeout?: number,
+  only?: boolean
+) => void) & {
+  only: (title: string, fn: TestFn, timeout?: number) => void
+}
+
 export interface TestRunner {
   isRunning(): boolean
   getTestCount(): number
-  registerTest: (title: string, fn: TestFn, timeout?: number) => void
+  registerTest: RegisterTest
   runTests: () => Promise<TestEndEvent>
 }
 

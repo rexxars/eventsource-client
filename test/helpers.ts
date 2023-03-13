@@ -36,6 +36,7 @@ export function deferClose(es: EventSourceClient, timeout = 25): Promise<void> {
 
 export function expect(thing: unknown): {
   toBe(expected: unknown): void
+  toBeLessThan(thanNum: number): void
   toMatchObject(expected: Record<string, any>): void
   toThrowError(expectedMessage: RegExp): void
 } {
@@ -43,6 +44,12 @@ export function expect(thing: unknown): {
     toBe(expected: unknown) {
       if (thing !== expected) {
         throw new Error(`Expected ${thing} to be ${expected}`)
+      }
+    },
+
+    toBeLessThan(thanNum: number) {
+      if (typeof thing !== 'number' || thing >= thanNum) {
+        throw new Error(`Expected ${thing} to be less than ${thanNum}`)
       }
     },
 

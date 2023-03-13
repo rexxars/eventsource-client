@@ -1,8 +1,9 @@
 import {createParser, type ParseEvent} from 'eventsource-parser'
 import {CLOSED, CONNECTING, OPEN} from './constants'
-import type {EnvAbstractions} from './abstractions'
+import type {EnvAbstractions, EventSourceAsyncValueResolver} from './abstractions'
 import type {
   EventSourceClient,
+  EventSourceMessage,
   EventSourceOptions,
   FetchLike,
   FetchLikeInit,
@@ -33,6 +34,10 @@ export function createEventSource(
   const {onMessage, onConnect = noop, onDisconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent using modified object later
+
+  const onCloseSubscribers: (() => void)[] = []
+  const subscribers: ((event: EventSourceMessage) => void)[] = onMessage ? [onMessage] : []
+  const emit = (event: EventSourceMessage) => subscribers.forEach((fn) => fn(event))
   const parser = createParser(onParsedMessage)
 
   // Client state
@@ -50,6 +55,7 @@ export function createEventSource(
   return {
     close,
     connect,
+    [Symbol.asyncIterator]: getEventIterator,
     get lastEventId() {
       return lastEventId
     },
@@ -86,10 +92,72 @@ export function createEventSource(
     readyState = CLOSED
     controller.abort()
     clearTimeout(reconnectTimer)
+    onCloseSubscribers.forEach((fn) => fn())
+  }
+
+  function getEventIterator(): AsyncGenerator<EventSourceMessage, void> {
+    const pullQueue: EventSourceAsyncValueResolver[] = []
+    const pushQueue: EventSourceMessage[] = []
+
+    function pullValue() {
+      return new Promise<IteratorResult<EventSourceMessage, void>>((resolve) => {
+        const value = pushQueue.shift()
+        if (value) {
+          resolve({value, done: false})
+        } else {
+          pullQueue.push(resolve)
+        }
+      })
+    }
+
+    const pushValue = function (value: EventSourceMessage) {
+      const resolve = pullQueue.shift()
+      if (resolve) {
+        resolve({value, done: false})
+      } else {
+        pushQueue.push(value)
+      }
+    }
+
+    function unsubscribe() {
+      subscribers.splice(subscribers.indexOf(pushValue), 1)
+      while (pullQueue.shift()) {}
+      while (pushQueue.shift()) {}
+    }
+
+    function onClose() {
+      const resolve = pullQueue.shift()
+      if (!resolve) {
+        return
+      }
+
+      resolve({done: true, value: undefined})
+      unsubscribe()
+    }
+
+    onCloseSubscribers.push(onClose)
+    subscribers.push(pushValue)
+
+    return {
+      next() {
+        return readyState === CLOSED ? this.return() : pullValue()
+      },
+      return() {
+        unsubscribe()
+        return Promise.resolve({done: true, value: undefined})
+      },
+      throw(error) {
+        unsubscribe()
+        return Promise.reject(error)
+      },
+      [Symbol.asyncIterator]() {
+        return this
+      },
+    }
   }
 
   function scheduleReconnect() {
-    // @todo emit reconnect/disconnect event
+    // @todo emit reconnect event?
     readyState = CONNECTING
     reconnectTimer = setTimeout(connect, reconnectMs)
   }
@@ -153,13 +221,11 @@ export function createEventSource(
       lastEventId = msg.id
     }
 
-    if (onMessage) {
-      onMessage({
-        id: msg.id,
-        data: msg.data,
-        event: msg.event,
-      })
-    }
+    emit({
+      id: msg.id,
+      data: msg.data,
+      event: msg.event,
+    })
   }
 
   function getRequestOptions(): FetchLikeInit {

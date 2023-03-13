@@ -19,6 +19,9 @@ export interface EventSourceClient {
   /** Connect to the event source. Automatically called on creation - you only need to call this after manually calling `close()`, when server has sent an HTTP 204, or the server responded with a non-retryable error. */
   connect(): void
 
+  /** Async iterator of messages received */
+  [Symbol.asyncIterator](): AsyncIterableIterator<EventSourceMessage>
+
   /** Last seen event ID, or the `initialLastEventId` if none has been received yet. */
   readonly lastEventId: string | undefined
 
@@ -39,7 +42,7 @@ export interface EventSourceOptions {
   url: string | URL
 
   /** Callback that fires each time a new event is received. */
-  onMessage: (event: EventSourceMessage) => void
+  onMessage?: (event: EventSourceMessage) => void
 
   /** Callback that fires each time the connection is established (multiple times in the case of reconnects). */
   onConnect?: () => void

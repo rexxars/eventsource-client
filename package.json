@@ -103,7 +103,8 @@
       "globalThis": false
     },
     "rules": {
-      "no-undef": "off"
+      "no-undef": "off",
+      "no-empty": "off"
     }
   }
 }

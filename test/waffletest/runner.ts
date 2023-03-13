@@ -13,6 +13,7 @@ interface TestDefinition {
   title: string
   timeout: number
   action: TestFn
+  only?: boolean
 }
 
 const DEFAULT_TIMEOUT = 15000
@@ -24,21 +25,37 @@ export function createRunner(options: TestRunnerOptions = {}): TestRunner {
   const {onEvent = noop, onStart = noop, onPass = noop, onFail = noop, onEnd = noop} = options
   const tests: TestDefinition[] = []
 
+  let hasOnlyTest = false
   let running = false
   let passes = 0
   let failures = 0
   let suiteStart = 0
 
-  function registerTest(title: string, fn: TestFn, timeout?: number) {
+  function registerTest(title: string, fn: TestFn, timeout?: number, only?: boolean): void {
     if (running) {
       throw new Error('Cannot register a test while tests are running')
     }
 
-    tests.push({
-      title,
-      timeout: timeout ?? DEFAULT_TIMEOUT,
-      action: fn,
-    })
+    if (only && !hasOnlyTest) {
+      // Clear the current tests
+      hasOnlyTest = true
+      while (tests.length > 0) {
+        tests.pop()
+      }
+    }
+
+    if (!hasOnlyTest || only) {
+      tests.push({
+        title,
+        timeout: timeout ?? DEFAULT_TIMEOUT,
+        action: fn,
+        only,
+      })
+    }
+  }
+
+  registerTest.only = (title: string, fn: TestFn, timeout?: number): void => {
+    return registerTest(title, fn, timeout, true)
   }
 
   async function runTests(): Promise<TestEndEvent> {
