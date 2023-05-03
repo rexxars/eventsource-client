@@ -245,7 +245,8 @@ export function registerTests(options: {
     const onMessage = getCallCounter()
     expect(() => {
       const es = createEventSource({
-        url: 123 as unknown as string,
+        // @ts-expect-error Should be a string
+        url: 123,
         fetch,
         onMessage,
       })
@@ -263,7 +264,8 @@ export function registerTests(options: {
         url: `${baseUrl}:${port}/`,
         fetch,
         onMessage,
-        initialLastEventId: 123 as unknown as string,
+        // @ts-expect-error Should be a string
+        initialLastEventId: 123,
       })
 
       es.close()
