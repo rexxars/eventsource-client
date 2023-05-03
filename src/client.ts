@@ -33,7 +33,7 @@ export function createEventSource(
 ): EventSourceClient {
   const {onMessage, onConnect = noop, onDisconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
-  const requestHeaders = {...options.headers} // Prevent using modified object later
+  const requestHeaders = {...options.headers} // Prevent post-creation mutations to headers
 
   const onCloseSubscribers: (() => void)[] = []
   const subscribers: ((event: EventSourceMessage) => void)[] = onMessage ? [onMessage] : []
