@@ -64,7 +64,11 @@ export function expect(thing: unknown): {
         }
 
         if (thing[key] !== expected[key]) {
-          throw new Error(`Expected key "${key}" to be ${expected[key]}, was ${thing[key]}`)
+          throw new Error(
+            `Expected key "${key}" to be ${JSON.stringify(expected[key])}, was ${JSON.stringify(
+              thing[key]
+            )}`
+          )
         }
       })
     },
