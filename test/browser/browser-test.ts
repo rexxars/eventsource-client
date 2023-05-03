@@ -10,6 +10,7 @@ if (!windowHasBeenExtended(window)) {
 }
 
 const runner = registerTests({
+  environment: 'browser',
   runner: createRunner({onEvent: window.reportTest}),
   createEventSource,
   port: 3883,

@@ -6,13 +6,18 @@ import {expect, deferClose, getCallCounter} from './helpers'
 import {TestRunner} from './waffletest'
 
 export function registerTests(options: {
+  environment: string
   runner: TestRunner
   port: number
   createEventSource: typeof CreateEventSourceFn
   fetch?: typeof fetch | typeof NodeFetch
 }): TestRunner {
-  const {createEventSource, port, fetch, runner} = options
+  const {createEventSource, port, fetch, runner, environment} = options
+
+  // eslint-disable-next-line no-empty-function
+  const browserTest = environment === 'browser' ? runner.registerTest : function noop() {}
   const test = runner.registerTest
+
   const baseUrl =
     typeof document === 'undefined'
       ? 'http://127.0.0.1'

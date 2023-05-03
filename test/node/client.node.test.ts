@@ -21,6 +21,7 @@ const NODE_TEST_PORT = 3945
   const server = await getServer(NODE_TEST_PORT)
 
   const runner = registerTests({
+    environment: 'node',
     runner: createRunner(nodeReporter),
     createEventSource,
     fetch,
