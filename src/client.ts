@@ -29,7 +29,7 @@ const noop = () => {
  */
 export function createEventSource(
   options: EventSourceOptions,
-  {getStream, getTextDecoderStream}: EnvAbstractions
+  {getStream}: EnvAbstractions
 ): EventSourceClient {
   const {onMessage, onConnect = noop, onDisconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
@@ -184,10 +184,10 @@ export function createEventSource(
 
     // Ensure that the response stream is a web stream
     // @todo Figure out a way to make this work without casting
-    const bodyStream = getStream(body) as ReadableStream<Uint8Array>
+    const bodyStream = getStream(body as any)
 
     // EventSources are always UTF-8 per spec
-    const stream = bodyStream.pipeThrough<string>(getTextDecoderStream('utf-8'))
+    const stream = bodyStream.pipeThrough<string>(new TextDecoderStream('utf-8'))
     const reader = stream.getReader()
     let open = true
 

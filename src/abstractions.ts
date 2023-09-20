@@ -1,4 +1,3 @@
-import type {ReadableStream as NodeWebReadableStream} from 'node:stream/web'
 import type {EventSourceMessage} from './types'
 
 /**
@@ -8,15 +7,7 @@ import type {EventSourceMessage} from './types'
  * @internal
  */
 export interface EnvAbstractions {
-  getStream(
-    body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array>
-  ): NodeWebReadableStream<Uint8Array>
-  getStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array>
-  getStream(
-    body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array>
-  ): NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array>
-
-  getTextDecoderStream(encoding: 'utf-8'): TextDecoderStream
+  getStream(body: NodeJS.ReadableStream | ReadableStream<Uint8Array>): ReadableStream<Uint8Array>
 }
 
 /**

@@ -1,4 +1,3 @@
-import type {ReadableStream as NodeWebReadableStream} from 'node:stream/web'
 import type {EnvAbstractions} from './abstractions'
 import type {EventSourceClient, EventSourceOptions} from './types'
 import {createEventSource as createSource} from './client'
@@ -11,7 +10,6 @@ export * from './constants'
  */
 const defaultAbstractions: EnvAbstractions = {
   getStream,
-  getTextDecoderStream,
 }
 
 /**
@@ -34,26 +32,11 @@ export function createEventSource(options: EventSourceOptions): EventSourceClien
  * @private
  */
 function getStream(
-  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array>
-): NodeWebReadableStream<Uint8Array>
-function getStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array>
-function getStream(
-  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array>
-): NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array> {
+  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>
+): ReadableStream<Uint8Array> {
   if (!(body instanceof ReadableStream)) {
     throw new Error('Invalid stream, expected a web ReadableStream')
   }
 
   return body
-}
-
-/**
- * Returns a `TextDecoderStream` instance from the web streams API
- *
- * @param encoding - Should always be 'utf-8' (per eventsource spec)
- * @returns A TextDecoderStream instance
- * @private
- */
-function getTextDecoderStream(encoding: 'utf-8'): TextDecoderStream {
-  return new TextDecoderStream(encoding)
 }

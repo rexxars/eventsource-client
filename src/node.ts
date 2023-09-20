@@ -1,9 +1,4 @@
 import {Readable} from 'node:stream'
-import {
-  TextDecoderStream as NodeWebTextDecoderStream,
-  ReadableStream as NodeWebReadableStream,
-} from 'node:stream/web'
-
 import {createEventSource as createSource} from './client'
 import type {EventSourceClient, EventSourceOptions} from './types'
 import type {EnvAbstractions} from './abstractions'
@@ -13,7 +8,6 @@ export * from './constants'
 
 const nodeAbstractions: EnvAbstractions = {
   getStream,
-  getTextDecoderStream,
 }
 
 /**
@@ -36,12 +30,8 @@ export function createEventSource(options: EventSourceOptions): EventSourceClien
  * @private
  */
 function getStream(
-  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array>
-): NodeWebReadableStream<Uint8Array>
-function getStream(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array>
-function getStream(
-  body: NodeJS.ReadableStream | NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array>
-): NodeWebReadableStream<Uint8Array> | ReadableStream<Uint8Array> {
+  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>
+): ReadableStream<Uint8Array> {
   if ('getReader' in body) {
     // Already a web stream
     return body
@@ -56,17 +46,6 @@ function getStream(
     throw new Error('Node.js 18 or higher required (`Readable.toWeb()` not defined)')
   }
 
-  return Readable.toWeb(Readable.from(body))
-}
-
-/**
- * Returns a `TextDecoderStream` instance from the web streams API
- *
- * @param encoding - Should always be 'utf-8' (per eventsource spec)
- * @returns A TextDecoderStream instance
- * @private
- */
-function getTextDecoderStream(encoding: 'utf-8'): TextDecoderStream {
-  // @todo See if there is any way around the casting here
-  return new NodeWebTextDecoderStream(encoding) as unknown as TextDecoderStream
+  // @todo Figure out if we can prevent casting
+  return Readable.toWeb(Readable.from(body)) as ReadableStream<Uint8Array>
 }
