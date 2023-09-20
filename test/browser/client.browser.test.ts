@@ -16,15 +16,10 @@
  * --no-headless
  * --serial
  */
-import {chromium, firefox, webkit, BrowserType} from 'playwright'
+import {chromium, firefox, webkit, type BrowserType} from 'playwright'
 import {getServer} from '../server'
 import {type TestEvent} from '../waffletest'
 import {nodeReporter} from '../waffletest/reporters/nodeReporter'
-
-type BatchedResults = {
-  browserName: string
-  events: TestEvent[]
-}[]
 
 type BrowserName = 'firefox' | 'chromium' | 'webkit'
 
@@ -56,37 +51,42 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
       : Object.entries(browsers).map(([name, browserType]) => ({name, browserType}))
 
   // Run all browsers in parallel, unless --serial is defined
-  const results: BatchedResults = []
+  let totalFailures = 0
+  let totalTests = 0
 
   if (RUN_IN_SERIAL) {
     for (const job of jobs) {
-      results.push({browserName: job.name, events: await runBrowserTest(job.browserType)})
+      const {failures, tests} = reportBrowserResult(job.name, await runBrowserTest(job.browserType))
+      totalFailures += failures
+      totalTests += tests
     }
   } else {
-    results.push(
-      ...(await Promise.all(
-        jobs.map(async (job) => {
-          return {browserName: job.name, events: await runBrowserTest(job.browserType)}
-        })
-      ))
+    await Promise.all(
+      jobs.map(async (job) => {
+        reportBrowserResult(job.name, await runBrowserTest(job.browserType))
+      })
     )
   }
 
-  // Now report output to the console
-  let totalFailures = 0
-  for (const result of results) {
-    console.log(`Browser: ${result.browserName}`)
+  function reportBrowserResult(
+    browserName: string,
+    events: TestEvent[]
+  ): {failures: number; passes: number; tests: number} {
+    console.log(`Browser: ${browserName}`)
 
-    for (const event of result.events) {
+    let passes = 0
+    let failures = 0
+    for (const event of events) {
       switch (event.event) {
         case 'start':
           // Ignored
           break
         case 'pass':
+          passes++
           reportPass(event)
           break
         case 'fail':
-          totalFailures++
+          failures++
           reportFail(event)
           break
         case 'end':
@@ -96,10 +96,11 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
           throw new Error(`Unexpected event: ${(event as any).event}`)
       }
     }
+
+    return {failures, passes, tests: passes + failures}
   }
 
-  const testCount = getTestCount(results)
-  console.log(`Ran ${testCount} tests against ${jobs.length} browsers`)
+  console.log(`Ran ${totalTests} tests against ${jobs.length} browsers`)
 
   await server.close()
 
@@ -111,6 +112,7 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
 
 function runBrowserTest(browserType: BrowserType): Promise<TestEvent[]> {
   return new Promise(async (resolve) => {
+    const domain = getBaseUrl(BROWSER_TEST_PORT)
     const browser = await browserType.launch({headless: !NO_HEADLESS})
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -129,24 +131,12 @@ function runBrowserTest(browserType: BrowserType): Promise<TestEvent[]> {
       resolve(events)
     })
 
-    await page.goto(`http://localhost:${BROWSER_TEST_PORT}/browser-test`)
+    await page.goto(`${domain}/browser-test`)
   })
 }
 
 function isDefinedBrowserType(browserName: string | undefined): browserName is BrowserName {
   return typeof browserName === 'string' && browserName in browsers
-}
-
-function getTestCount(results: BatchedResults): number {
-  for (const result of results) {
-    for (const event of result.events) {
-      if (event.event === 'start') {
-        return event.tests
-      }
-    }
-  }
-
-  return 0
 }
 
 function getBrowserFlag(): BrowserName | undefined {
@@ -172,4 +162,10 @@ function getBrowserFlag(): BrowserName | undefined {
   }
 
   return resolved
+}
+
+function getBaseUrl(port: number): string {
+  return typeof document === 'undefined'
+    ? `http://127.0.0.1:${port}`
+    : `${location.protocol}//${location.hostname}:${port}`
 }
