@@ -44,18 +44,15 @@
   "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=16.6.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
-    "destroy": "^1.2.0",
     "eventsource-parser": "^1.0.0"
   },
   "devDependencies": {
     "@sanity/pkg-utils": "^2.2.3",
-    "@types/destroy": "^1.0.0",
     "@types/express": "^4.17.14",
     "@types/node": "^18.0.0",
-    "@types/node-fetch": "^2.6.2",
     "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
@@ -63,7 +60,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-sanity": "^5.1.0",
-    "node-fetch": "^2.6.7",
     "playwright": "^1.31.2",
     "prettier": "^2.7.1",
     "rimraf": "^4.1.2",

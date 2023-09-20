@@ -7,7 +7,6 @@
  * Could we use a testing library? Yes.
  * Would that add a whole lot of value? No.
  */
-import fetch from 'node-fetch'
 import {createEventSource} from '../../src/node'
 import {createRunner} from '../waffletest/runner'
 import {registerTests} from '../tests'
@@ -24,7 +23,7 @@ const NODE_TEST_PORT = 3945
     environment: 'node',
     runner: createRunner(nodeReporter),
     createEventSource,
-    fetch,
+    fetch: globalThis.fetch,
     port: 3945,
   })
 

@@ -1,16 +1,14 @@
-import type NodeFetch from 'node-fetch'
-
 import type {createEventSource as CreateEventSourceFn} from '../src/default'
 import {OPEN, CONNECTING, CLOSED} from '../src/constants'
 import {expect, deferClose, getCallCounter} from './helpers'
-import {TestRunner} from './waffletest'
+import type {TestRunner} from './waffletest'
 
 export function registerTests(options: {
   environment: string
   runner: TestRunner
   port: number
   createEventSource: typeof CreateEventSourceFn
-  fetch?: typeof fetch | typeof NodeFetch
+  fetch?: typeof fetch
 }): TestRunner {
   const {createEventSource, port, fetch, runner, environment} = options
 

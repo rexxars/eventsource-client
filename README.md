@@ -29,7 +29,7 @@ npm install --save eventsource-client
 
 ## Supported engines
 
-- Node.js >= 16.6
+- Node.js >= 18
 - Chrome >= 71
 - Safari >= 14.1
 - Firefox >= 105
@@ -60,8 +60,8 @@ for await (const {data, event, id} of es) {
   }
 }
 
-// IMPORTANT: EventSource is _not_ closed automatically when calling breaking
-// out of loop. You must manually call `close()` to close the connection.
+// IMPORTANT: EventSource is _not_ closed automatically when breaking out of
+// loop. You must manually call `close()` to close the connection.
 es.close()
 ```
 
@@ -96,9 +96,6 @@ es.close()
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Redirect handling
-- [ ] Custom HTTP method
-- [ ] Request body
-- [ ] Custom headers
 - [ ] `withCredentials` support (browser)
 - [ ] Deno support/tests
 - [ ] Bun support/tests
