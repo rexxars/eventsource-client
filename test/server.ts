@@ -31,6 +31,10 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeAuthed(req, res)
     case '/cors':
       return writeCors(req, res)
+    case '/stalled':
+      return writeStalledConnection(req, res)
+    case '/trickle':
+      return writeTricklingConnection(req, res)
 
     // Browser test endpoints (HTML/JS)
     case '/browser-test':
@@ -126,6 +130,65 @@ async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
     })
   )
 
+  res.end()
+}
+
+async function writeStalledConnection(req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  const lastId = getLastEventId(req)
+  const reconnected = lastId === '1'
+
+  res.write(
+    formatEvent({
+      id: reconnected ? '2' : '1',
+      event: 'welcome',
+      data: reconnected
+        ? 'Welcome back'
+        : 'Connected - now I will sleep for "too long" without sending data',
+    })
+  )
+
+  if (reconnected) {
+    await delay(250)
+    res.write(
+      formatEvent({
+        id: '3',
+        event: 'success',
+        data: 'You waited long enough!',
+      })
+    )
+
+    res.end()
+  }
+
+  // Intentionally not closing on first-connect that never sends data after welcome
+}
+
+async function writeTricklingConnection(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  res.write(
+    formatEvent({
+      event: 'welcome',
+      data: 'Connected - now I will keep sending "comments" for a while',
+    })
+  )
+
+  for (let i = 0; i < 60; i++) {
+    await delay(500)
+    res.write(':\n')
+  }
+
+  res.write(formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
   res.end()
 }
 
