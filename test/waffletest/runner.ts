@@ -1,3 +1,4 @@
+import {ExpectationError} from '../helpers'
 import type {
   TestRunner,
   TestFn,
@@ -82,13 +83,24 @@ export function createRunner(options: TestRunnerOptions = {}): TestRunner {
         }
         onPass(pass)
         onEvent(pass)
-      } catch (err) {
+      } catch (err: unknown) {
         failures++
+
+        let error: string
+        if (err instanceof ExpectationError) {
+          error = err.message
+        } else if (err instanceof Error) {
+          const stack = (err.stack || '').toString()
+          error = stack.includes(err.message) ? stack : `${err.message}\n\n${stack}`
+        } else {
+          error = `${err}`
+        }
+
         const fail: TestFailEvent = {
           event: 'fail',
           title: test.title,
           duration: Date.now() - startTime,
-          error: err instanceof Error ? err.stack ?? err.message : `${err}`,
+          error,
         }
         onFail(fail)
         onEvent(fail)

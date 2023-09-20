@@ -3,12 +3,21 @@ import type {EventSourceClient} from '../src/types'
 
 type MessageReceiver = SinonSpy & {waitForCallCount: (num: number) => Promise<void>}
 
-export function getCallCounter(): MessageReceiver {
+export class ExpectationError extends Error {
+  type = 'ExpectationError'
+}
+
+export function getCallCounter(onCall?: (info: {numCalls: number}) => void): MessageReceiver {
   const listeners: [number, () => void][] = []
 
   let numCalls = 0
   const spy = sinon.fake(() => {
     numCalls++
+
+    if (onCall) {
+      onCall({numCalls})
+    }
+
     listeners.forEach(([wanted, resolve]) => {
       if (wanted === numCalls) {
         resolve()
@@ -43,28 +52,28 @@ export function expect(thing: unknown): {
   return {
     toBe(expected: unknown) {
       if (thing !== expected) {
-        throw new Error(`Expected ${thing} to be ${expected}`)
+        throw new ExpectationError(`Expected ${thing} to be ${expected}`)
       }
     },
 
     toBeLessThan(thanNum: number) {
       if (typeof thing !== 'number' || thing >= thanNum) {
-        throw new Error(`Expected ${thing} to be less than ${thanNum}`)
+        throw new ExpectationError(`Expected ${thing} to be less than ${thanNum}`)
       }
     },
 
     toMatchObject(expected: Record<string, any>) {
       if (!isPlainObject(thing)) {
-        throw new Error(`Expected an object, was... not`)
+        throw new ExpectationError(`Expected an object, was... not`)
       }
 
       Object.keys(expected).forEach((key) => {
         if (!(key in thing)) {
-          throw new Error(`Expected key "${key}" to be in object, was not`)
+          throw new ExpectationError(`Expected key "${key}" to be in object, was not`)
         }
 
         if (thing[key] !== expected[key]) {
-          throw new Error(
+          throw new ExpectationError(
             `Expected key "${key}" to be ${JSON.stringify(expected[key])}, was ${JSON.stringify(
               thing[key]
             )}`
@@ -75,7 +84,9 @@ export function expect(thing: unknown): {
 
     toThrowError(expectedMessage: RegExp) {
       if (typeof thing !== 'function') {
-        throw new Error(`Expected a function that was going to throw, but wasn't a function`)
+        throw new ExpectationError(
+          `Expected a function that was going to throw, but wasn't a function`
+        )
       }
 
       try {
@@ -83,12 +94,14 @@ export function expect(thing: unknown): {
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : `${err}`
         if (!expectedMessage.test(message)) {
-          throw new Error(`Expected error message to match ${expectedMessage}, got ${message}`)
+          throw new ExpectationError(
+            `Expected error message to match ${expectedMessage}, got ${message}`
+          )
         }
         return
       }
 
-      throw new Error('Expected function to throw error, but did not')
+      throw new ExpectationError('Expected function to throw error, but did not')
     },
   }
 }
