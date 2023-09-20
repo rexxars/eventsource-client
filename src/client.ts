@@ -166,15 +166,16 @@ export function createEventSource(
     onConnect()
 
     const {body, redirected, status} = response
-    if (!body) {
-      throw new Error('Missing response body')
-    }
 
     // HTTP 204 means "close the connection, no more data will be sent"
     if (status === 204) {
       onDisconnect()
       close()
       return
+    }
+
+    if (!body) {
+      throw new Error('Missing response body')
     }
 
     if (redirected) {
