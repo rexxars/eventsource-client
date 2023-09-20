@@ -277,6 +277,33 @@ export function registerTests(options: {
     expect(onMessage.callCount).toBe(0)
   })
 
+  test('can request cross-origin', async () => {
+    const hostUrl = new URL(`${baseUrl}:${port}/cors`)
+    const url = new URL(hostUrl)
+    url.hostname = url.hostname === 'localhost' ? '127.0.0.1' : 'localhost'
+
+    const onMessage = getCallCounter()
+    const es = createEventSource({
+      url,
+      fetch,
+      onMessage,
+    })
+
+    await onMessage.waitForCallCount(1)
+    expect(onMessage.callCount).toBe(1)
+
+    const lastMessage = onMessage.lastCall.lastArg
+    expect(lastMessage.event).toBe('origin')
+
+    if (environment === 'browser') {
+      expect(lastMessage.data).toBe(hostUrl.origin)
+    } else {
+      expect(lastMessage.data).toBe('<none>')
+    }
+
+    await deferClose(es)
+  })
+
   browserTest(
     'can use the `credentials` option to control cookies being sent/not sent',
     async () => {

@@ -29,6 +29,8 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeCookies(req, res)
     case '/authed':
       return writeAuthed(req, res)
+    case '/cors':
+      return writeCors(req, res)
 
     // Browser test endpoints (HTML/JS)
     case '/browser-test':
@@ -121,6 +123,27 @@ async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'welcome',
       data: 'That was a slow connect, was it not?',
+    })
+  )
+
+  res.end()
+}
+
+function writeCors(req: IncomingMessage, res: ServerResponse) {
+  const origin = req.headers.origin
+  const cors = origin ? {'Access-Control-Allow-Origin': origin} : {}
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    ...cors,
+  })
+
+  res.write(
+    formatEvent({
+      event: 'origin',
+      data: origin || '<none>',
     })
   )
 

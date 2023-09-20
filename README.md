@@ -95,8 +95,6 @@ es.close()
 - [ ] Figure out what to do on broken connection on request body
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
-- [ ] Redirect handling
-- [ ] `withCredentials` support (browser)
 - [ ] Deno support/tests
 - [ ] Bun support/tests
 - [ ] Consider legacy build
