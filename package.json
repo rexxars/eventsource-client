@@ -29,8 +29,8 @@
     "prebuild": "npm run clean",
     "prepublishOnly": "npm run build",
     "test": "npm run test:node && npm run test:browser",
-    "test:node": "ts-node test/node/client.node.test.ts",
-    "test:browser": "ts-node test/browser/client.browser.test.ts"
+    "test:node": "ts-node -T test/node/client.node.test.ts",
+    "test:browser": "ts-node -T test/browser/client.browser.test.ts"
   },
   "repository": {
     "type": "git",
