@@ -91,6 +91,7 @@ export function createEventSource(
   function close() {
     readyState = CLOSED
     controller.abort()
+    parser.reset()
     clearTimeout(reconnectTimer)
     onCloseSubscribers.forEach((fn) => fn())
   }
@@ -202,6 +203,7 @@ export function createEventSource(
 
       open = false
       request = null
+      parser.reset()
 
       onDisconnect()
 
