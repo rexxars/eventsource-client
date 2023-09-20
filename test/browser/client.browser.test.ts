@@ -115,6 +115,8 @@ function runBrowserTest(browserType: BrowserType): Promise<TestEvent[]> {
     const domain = getBaseUrl(BROWSER_TEST_PORT)
     const browser = await browserType.launch({headless: !NO_HEADLESS})
     const context = await browser.newContext()
+    await context.clearCookies()
+
     const page = await context.newPage()
     const events: TestEvent[] = []
 

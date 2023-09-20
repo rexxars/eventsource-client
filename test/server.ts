@@ -25,6 +25,10 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeSlowConnect(req, res)
     case '/debug':
       return writeDebug(req, res)
+    case '/set-cookie':
+      return writeCookies(req, res)
+    case '/authed':
+      return writeAuthed(req, res)
 
     // Browser test endpoints (HTML/JS)
     case '/browser-test':
@@ -53,6 +57,10 @@ function writeDefault(_req: IncomingMessage, res: ServerResponse) {
   )
 }
 
+/**
+ * Writes 3 messages, then closes connection.
+ * Picks up event ID and continues from there.
+ */
 async function writeCounter(req: IncomingMessage, res: ServerResponse) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -151,6 +159,39 @@ async function writeDebug(req: IncomingMessage, res: ServerResponse) {
         headers: req.headers,
         bodyHash,
       }),
+    })
+  )
+
+  res.end()
+}
+
+/**
+ * Ideally we'd just set these in the storage state, but Playwright does not seem to
+ * be able to for some obscure reason - is not set if passed in page context or through
+ * `addCookies()`.
+ */
+function writeCookies(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Set-Cookie': 'someSession=someValue; Path=/authed; HttpOnly; SameSite=Lax;',
+    Connection: 'keep-alive',
+  })
+  res.write(JSON.stringify({cookiesWritten: true}))
+  res.end()
+}
+
+function writeAuthed(req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  res.write(
+    formatEvent({
+      event: 'authInfo',
+      data: JSON.stringify({cookies: req.headers.cookie || ''}),
     })
   )
 

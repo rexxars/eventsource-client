@@ -277,5 +277,31 @@ export function registerTests(options: {
     expect(onMessage.callCount).toBe(0)
   })
 
+  browserTest(
+    'can use the `credentials` option to control cookies being sent/not sent',
+    async () => {
+      // Ideally this would be done through playwright, but can't get it working,
+      // so let's just fire off a request that sets the cookies for now
+      const {cookiesWritten} = await globalThis.fetch('/set-cookie').then((res) => res.json())
+      expect(cookiesWritten).toBe(true)
+
+      let es = createEventSource({url: '/authed', fetch, credentials: 'include'})
+      for await (const event of es) {
+        expect(event.event).toBe('authInfo')
+        expect(JSON.parse(event.data)).toMatchObject({cookies: 'someSession=someValue'})
+        break
+      }
+
+      await deferClose(es)
+
+      es = createEventSource({url: '/authed', fetch, credentials: 'omit'})
+      for await (const event of es) {
+        expect(event.event).toBe('authInfo')
+        expect(JSON.parse(event.data)).toMatchObject({cookies: ''})
+        break
+      }
+    }
+  )
+
   return runner
 }
