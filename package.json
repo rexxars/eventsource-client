@@ -11,11 +11,11 @@
     ".": {
       "types": "./dist/default.d.ts",
       "source": "./src/default.ts",
-      "require": "./dist/default.js",
       "node": {
         "import": "./dist/node.cjs.mjs",
         "require": "./dist/node.js"
       },
+      "require": "./dist/default.js",
       "import": "./dist/default.esm.js",
       "default": "./dist/default.esm.js"
     },
@@ -29,8 +29,8 @@
     "prebuild": "npm run clean",
     "prepublishOnly": "npm run build",
     "test": "npm run test:node && npm run test:browser",
-    "test:node": "ts-node -T test/node/client.node.test.ts",
-    "test:browser": "ts-node -T test/browser/client.browser.test.ts"
+    "test:node": "ts-node test/node/client.node.test.ts",
+    "test:browser": "ts-node test/browser/client.browser.test.ts"
   },
   "repository": {
     "type": "git",
@@ -47,27 +47,27 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "eventsource-parser": "^1.0.0"
+    "eventsource-parser": "^1.1.1"
   },
   "devDependencies": {
-    "@sanity/pkg-utils": "^2.2.3",
+    "@sanity/pkg-utils": "^2.4.9",
     "@types/express": "^4.17.14",
     "@types/node": "^18.0.0",
-    "@types/sinon": "^10.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.43.0",
-    "@typescript-eslint/parser": "^5.43.0",
-    "esbuild": "^0.17.11",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-sanity": "^5.1.0",
-    "playwright": "^1.31.2",
-    "prettier": "^2.7.1",
-    "rimraf": "^4.1.2",
-    "rollup-plugin-visualizer": "^5.9.0",
-    "sinon": "^15.0.1",
+    "@types/sinon": "^10.0.16",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "esbuild": "^0.19.3",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-sanity": "^6.0.0",
+    "playwright": "^1.38.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.1",
+    "rollup-plugin-visualizer": "^5.9.2",
+    "sinon": "^16.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5",
-    "undici": "^5.12.0"
+    "typescript": "^5.2.2",
+    "undici": "^5.24.0"
   },
   "bugs": {
     "url": "https://github.com/rexxars/eventsource-client/issues"
