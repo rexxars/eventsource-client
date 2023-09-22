@@ -189,7 +189,7 @@ export function createEventSource(
     const bodyStream = getStream(body as any)
 
     // EventSources are always UTF-8 per spec
-    const stream = bodyStream.pipeThrough<string>(new TextDecoderStream('utf-8'))
+    const stream = bodyStream.pipeThrough<string>(new TextDecoderStream())
     const reader = stream.getReader()
     let open = true
 
