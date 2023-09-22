@@ -84,7 +84,7 @@ export function createEventSource(
           throw err
         }
 
-        // @todo schedule reconnect?
+        scheduleReconnect()
       })
   }
 
