@@ -31,7 +31,7 @@ export function createEventSource(
   options: EventSourceOptions,
   {getStream}: EnvAbstractions
 ): EventSourceClient {
-  const {onMessage, onConnect = noop, onDisconnect = noop} = options
+  const {onMessage, onConnect = noop, onDisconnect = noop, onScheduleReconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent post-creation mutations to headers
 
@@ -158,7 +158,7 @@ export function createEventSource(
   }
 
   function scheduleReconnect() {
-    // @todo emit reconnect event?
+    onScheduleReconnect({delay: reconnectMs})
     readyState = CONNECTING
     reconnectTimer = setTimeout(connect, reconnectMs)
   }
