@@ -165,6 +165,7 @@ export function createEventSource(
 
   async function onFetchResponse(response: FetchLikeResponse) {
     onConnect()
+    parser.reset()
 
     const {body, redirected, status} = response
 
