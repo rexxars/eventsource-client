@@ -28,5 +28,8 @@ jobs:
       - name: Install Playwright Browsers
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+      - name: Install Playwright (alt)
+        run: npx playwright install-deps
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
       - name: Run browser tests
         run: npm run test:browser
