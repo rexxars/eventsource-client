@@ -63,7 +63,12 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
   } else {
     await Promise.all(
       jobs.map(async (job) => {
-        reportBrowserResult(job.name, await runBrowserTest(job.browserType))
+        const {failures, tests} = reportBrowserResult(
+          job.name,
+          await runBrowserTest(job.browserType),
+        )
+        totalFailures += failures
+        totalTests += tests
       }),
     )
   }
