@@ -96,7 +96,7 @@ es.close()
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Deno support/tests
-- [ ] Bun support/tests
+- [ ] Bun support/tests (blocked: no `TextDecoderStream` support)
 - [ ] Consider legacy build
 
 ## License
