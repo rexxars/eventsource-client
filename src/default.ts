@@ -32,7 +32,7 @@ export function createEventSource(options: EventSourceOptions): EventSourceClien
  * @private
  */
 function getStream(
-  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>
+  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>,
 ): ReadableStream<Uint8Array> {
   if (!(body instanceof ReadableStream)) {
     throw new Error('Invalid stream, expected a web ReadableStream')

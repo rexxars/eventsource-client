@@ -19,5 +19,5 @@ export interface EnvAbstractions {
 export type EventSourceAsyncValueResolver = (
   value:
     | IteratorResult<EventSourceMessage, void>
-    | PromiseLike<IteratorResult<EventSourceMessage, void>>
+    | PromiseLike<IteratorResult<EventSourceMessage, void>>,
 ) => void

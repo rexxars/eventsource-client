@@ -29,7 +29,7 @@ const noop = () => {
  */
 export function createEventSource(
   options: EventSourceOptions,
-  {getStream}: EnvAbstractions
+  {getStream}: EnvAbstractions,
 ): EventSourceClient {
   const {onMessage, onConnect = noop, onDisconnect = noop, onScheduleReconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)

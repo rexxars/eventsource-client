@@ -75,8 +75,8 @@ export function expect(thing: unknown): {
         if (thing[key] !== expected[key]) {
           throw new ExpectationError(
             `Expected key "${key}" to be ${JSON.stringify(expected[key])}, was ${JSON.stringify(
-              thing[key]
-            )}`
+              thing[key],
+            )}`,
           )
         }
       })
@@ -85,7 +85,7 @@ export function expect(thing: unknown): {
     toThrowError(expectedMessage: RegExp) {
       if (typeof thing !== 'function') {
         throw new ExpectationError(
-          `Expected a function that was going to throw, but wasn't a function`
+          `Expected a function that was going to throw, but wasn't a function`,
         )
       }
 
@@ -95,7 +95,7 @@ export function expect(thing: unknown): {
         const message = err instanceof Error ? err.message : `${err}`
         if (!expectedMessage.test(message)) {
           throw new ExpectationError(
-            `Expected error message to match ${expectedMessage}, got ${message}`
+            `Expected error message to match ${expectedMessage}, got ${message}`,
           )
         }
         return

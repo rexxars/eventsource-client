@@ -59,7 +59,7 @@ function writeDefault(_req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'welcome',
       data: 'Hello, world!',
-    })
+    }),
   )
 }
 
@@ -84,7 +84,7 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
         event: 'counter',
         data: `Counter is at ${counter}`,
         id: `${counter}`,
-      })
+      }),
     )
     await delay(25)
   }
@@ -107,7 +107,7 @@ function writeOne(req: IncomingMessage, res: ServerResponse) {
         event: 'progress',
         data: '100%',
         id: 'prct-100',
-      })
+      }),
     )
   }
 
@@ -127,7 +127,7 @@ async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'welcome',
       data: 'That was a slow connect, was it not?',
-    })
+    }),
   )
 
   res.end()
@@ -150,7 +150,7 @@ async function writeStalledConnection(req: IncomingMessage, res: ServerResponse)
       data: reconnected
         ? 'Welcome back'
         : 'Connected - now I will sleep for "too long" without sending data',
-    })
+    }),
   )
 
   if (reconnected) {
@@ -160,7 +160,7 @@ async function writeStalledConnection(req: IncomingMessage, res: ServerResponse)
         id: '3',
         event: 'success',
         data: 'You waited long enough!',
-      })
+      }),
     )
 
     res.end()
@@ -180,7 +180,7 @@ async function writeTricklingConnection(_req: IncomingMessage, res: ServerRespon
     formatEvent({
       event: 'welcome',
       data: 'Connected - now I will keep sending "comments" for a while',
-    })
+    }),
   )
 
   for (let i = 0; i < 60; i++) {
@@ -207,7 +207,7 @@ function writeCors(req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'origin',
       data: origin || '<none>',
-    })
+    }),
   )
 
   res.end()
@@ -245,7 +245,7 @@ async function writeDebug(req: IncomingMessage, res: ServerResponse) {
         headers: req.headers,
         bodyHash,
       }),
-    })
+    }),
   )
 
   res.end()
@@ -278,7 +278,7 @@ function writeAuthed(req: IncomingMessage, res: ServerResponse) {
     formatEvent({
       event: 'authInfo',
       data: JSON.stringify({cookies: req.headers.cookie || ''}),
-    })
+    }),
   )
 
   res.end()

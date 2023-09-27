@@ -327,7 +327,7 @@ export function registerTests(options: {
         expect(JSON.parse(event.data)).toMatchObject({cookies: ''})
         break
       }
-    }
+    },
   )
 
   return runner

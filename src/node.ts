@@ -30,7 +30,7 @@ export function createEventSource(options: EventSourceOptions): EventSourceClien
  * @private
  */
 function getStream(
-  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>
+  body: NodeJS.ReadableStream | ReadableStream<Uint8Array>,
 ): ReadableStream<Uint8Array> {
   if ('getReader' in body) {
     // Already a web stream

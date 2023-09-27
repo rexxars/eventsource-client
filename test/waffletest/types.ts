@@ -15,7 +15,7 @@ export type RegisterTest = ((
   title: string,
   fn: TestFn,
   timeout?: number,
-  only?: boolean
+  only?: boolean,
 ) => void) & {
   only: (title: string, fn: TestFn, timeout?: number) => void
 }
