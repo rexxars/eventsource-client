@@ -24,7 +24,7 @@ const NODE_TEST_PORT = 3945
     runner: createRunner(nodeReporter),
     createEventSource,
     fetch: globalThis.fetch,
-    port: 3945,
+    port: NODE_TEST_PORT,
   })
 
   const result = await runner.runTests()

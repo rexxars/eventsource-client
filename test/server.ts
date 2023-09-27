@@ -8,7 +8,7 @@ export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer(onRequest)
       .on('error', reject)
-      .listen(port, '127.0.0.1', () => resolve(server))
+      .listen(port, '0.0.0.0', () => resolve(server))
   })
 }
 
