@@ -1,6 +1,6 @@
 {
   "name": "eventsource-client",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Modern EventSource client for browsers and Node.js",
   "sideEffects": false,
   "types": "./dist/default.d.ts",
