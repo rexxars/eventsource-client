@@ -1,9 +1,10 @@
-name: CI
+name: Release
 
-# Workflow name based on selected inputs. Fallback to default Github naming when expression evaluates to empty string
+# Workflow name based on selected inputs.
+# Fallback to default GitHub naming when expression evaluates to empty string
 run-name: >-
   ${{
-    inputs.release && 'CI ➤ Publish to NPM' ||
+    inputs.release && 'Release ➤ Publish to NPM' ||
     ''
   }}
 on:
