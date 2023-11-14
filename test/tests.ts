@@ -64,14 +64,14 @@ export function registerTests(options: {
     // Will reconnect infinitely, stop at 8 messages
     await onMessage.waitForCallCount(8)
 
-    expect(es.lastEventId).toBe('8')
     expect(es.url).toBe(url)
-    expect(onMessage.callCount).toBe(8)
     expect(onMessage.lastCall.lastArg).toMatchObject({
       data: 'Counter is at 8',
       event: 'counter',
       id: '8',
     })
+    expect(es.lastEventId).toBe('8')
+    expect(onMessage.callCount).toBe(8)
 
     await deferClose(es)
   })
