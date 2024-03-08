@@ -1,10 +1,11 @@
 import {Readable} from 'node:stream'
+
+import type {EnvAbstractions} from './abstractions'
 import {createEventSource as createSource} from './client'
 import type {EventSourceClient, EventSourceOptions} from './types'
-import type {EnvAbstractions} from './abstractions'
 
-export * from './types'
 export * from './constants'
+export * from './types'
 
 const nodeAbstractions: EnvAbstractions = {
   getStream,

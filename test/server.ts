@@ -1,7 +1,8 @@
 import {createHash} from 'node:crypto'
 import {createReadStream} from 'node:fs'
-import {resolve as resolvePath} from 'node:path'
 import {createServer, type IncomingMessage, type Server, type ServerResponse} from 'node:http'
+import {resolve as resolvePath} from 'node:path'
+
 import esbuild from 'esbuild'
 
 export function getServer(port: number): Promise<Server> {

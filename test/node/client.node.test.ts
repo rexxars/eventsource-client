@@ -8,10 +8,10 @@
  * Would that add a whole lot of value? No.
  */
 import {createEventSource} from '../../src/node'
-import {createRunner} from '../waffletest/runner'
-import {registerTests} from '../tests'
 import {getServer} from '../server'
+import {registerTests} from '../tests'
 import {nodeReporter} from '../waffletest/reporters/nodeReporter'
+import {createRunner} from '../waffletest/runner'
 
 const NODE_TEST_PORT = 3945
 

@@ -1,4 +1,5 @@
 import sinon, {type SinonSpy} from 'sinon'
+
 import type {EventSourceClient} from '../src/types'
 
 type MessageReceiver = SinonSpy & {waitForCallCount: (num: number) => Promise<void>}
@@ -25,7 +26,7 @@ export function getCallCounter(onCall?: (info: {numCalls: number}) => void): Mes
     })
   })
 
-  const fn = spy as any as MessageReceiver
+  const fn = spy as unknown as MessageReceiver
   fn.waitForCallCount = (num: number) => {
     return new Promise<void>((resolve) => {
       if (numCalls === num) {
@@ -46,7 +47,7 @@ export function deferClose(es: EventSourceClient, timeout = 25): Promise<void> {
 export function expect(thing: unknown): {
   toBe(expected: unknown): void
   toBeLessThan(thanNum: number): void
-  toMatchObject(expected: Record<string, any>): void
+  toMatchObject(expected: Record<string, unknown>): void
   toThrowError(expectedMessage: RegExp): void
 } {
   return {
@@ -62,7 +63,7 @@ export function expect(thing: unknown): {
       }
     },
 
-    toMatchObject(expected: Record<string, any>) {
+    toMatchObject(expected: Record<string, unknown>) {
       if (!isPlainObject(thing)) {
         throw new ExpectationError(`Expected an object, was... not`)
       }
@@ -106,6 +107,6 @@ export function expect(thing: unknown): {
   }
 }
 
-function isPlainObject(obj: unknown): obj is Record<string, any> {
+function isPlainObject(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj)
 }

@@ -1,13 +1,13 @@
 import {ExpectationError} from '../helpers'
 import type {
-  TestRunner,
-  TestFn,
-  TestRunnerOptions,
-  TestEvent,
-  TestStartEvent,
-  TestPassEvent,
-  TestFailEvent,
   TestEndEvent,
+  TestEvent,
+  TestFailEvent,
+  TestFn,
+  TestPassEvent,
+  TestRunner,
+  TestRunnerOptions,
+  TestStartEvent,
 } from './types'
 
 interface TestDefinition {
@@ -18,6 +18,8 @@ interface TestDefinition {
 }
 
 const DEFAULT_TIMEOUT = 15000
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const noop = (_event: TestEvent) => {
   /* intentional noop */
 }

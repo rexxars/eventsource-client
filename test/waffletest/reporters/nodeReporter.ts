@@ -1,6 +1,7 @@
 /* eslint-disable no-process-env, no-console */
 import {platform} from 'node:os'
 import {isatty} from 'node:tty'
+
 import type {
   TestEndEvent,
   TestFailEvent,
@@ -8,7 +9,7 @@ import type {
   TestReporter,
   TestStartEvent,
 } from '../types'
-import {getStartText, getFailText, getPassText, getEndText} from './helpers'
+import {getEndText, getFailText, getPassText, getStartText} from './helpers'
 
 const CAN_USE_COLORS = canUseColors()
 

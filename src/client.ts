@@ -1,6 +1,7 @@
 import {createParser, type ParseEvent} from 'eventsource-parser'
-import {CLOSED, CONNECTING, OPEN} from './constants'
+
 import type {EnvAbstractions, EventSourceAsyncValueResolver} from './abstractions'
+import {CLOSED, CONNECTING, OPEN} from './constants'
 import type {
   EventSourceClient,
   EventSourceMessage,

@@ -1,6 +1,6 @@
+import {CLOSED, CONNECTING, OPEN} from '../src/constants'
 import type {createEventSource as CreateEventSourceFn} from '../src/default'
-import {OPEN, CONNECTING, CLOSED} from '../src/constants'
-import {expect, deferClose, getCallCounter} from './helpers'
+import {deferClose, expect, getCallCounter} from './helpers'
 import type {TestRunner} from './waffletest'
 
 export function registerTests(options: {
