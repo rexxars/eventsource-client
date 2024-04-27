@@ -100,7 +100,6 @@ es.close()
 - [ ] Figure out what to do on broken connection on request body
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
-- [ ] Deno support/tests
 - [ ] Consider legacy build
 
 ## License

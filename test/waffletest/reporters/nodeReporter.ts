@@ -44,12 +44,27 @@ function green(str: string): string {
   return CAN_USE_COLORS ? `\x1b[32m${str}\x1b[39m` : str
 }
 
+function getEnv(envVar: string): string | undefined {
+  if (typeof process !== 'undefined' && 'env' in process && typeof process.env === 'object') {
+    return process.env[envVar]
+  }
+
+  if (typeof globalThis.Deno !== 'undefined') {
+    return globalThis.Deno.env.get(envVar)
+  }
+
+  throw new Error('Unable to find environment variables')
+}
+
+function hasEnv(envVar: string): boolean {
+  return typeof getEnv(envVar) !== 'undefined'
+}
+
 function canUseColors(): boolean {
   const isWindows = platform() === 'win32'
-  const isDumbTerminal = process.env.TERM === 'dumb'
-  const isCompatibleTerminal = isatty(1) && process.env.TERM && !isDumbTerminal
+  const isDumbTerminal = getEnv('TERM') === 'dumb'
+  const isCompatibleTerminal = isatty(1) && getEnv('TERM') && !isDumbTerminal
   const isCI =
-    'CI' in process.env &&
-    ('GITHUB_ACTIONS' in process.env || 'GITLAB_CI' in process.env || 'CIRCLECI' in process.env)
+    hasEnv('CI') && (hasEnv('GITHUB_ACTIONS') || hasEnv('GITLAB_CI') || hasEnv('CIRCLECI'))
   return (isWindows && !isDumbTerminal) || isCompatibleTerminal || isCI
 }

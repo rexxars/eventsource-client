@@ -7,17 +7,19 @@ import esbuild from 'esbuild'
 
 import {unicodeLines} from './fixtures.js'
 
+const isDeno = typeof globalThis.Deno !== 'undefined'
+
 export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer(onRequest)
       .on('error', reject)
-      .listen(port, '::', () => resolve(server))
+      .listen(port, isDeno ? '127.0.0.1' : '::', () => resolve(server))
   })
 }
 
 function onRequest(req: IncomingMessage, res: ServerResponse) {
   // Disable Nagle's algorithm for testing
-  if (res.socket) {
+  if (res.socket && 'setNoDelay' in res.socket) {
     res.socket.setNoDelay(true)
   }
 
@@ -65,7 +67,8 @@ function writeDefault(_req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'welcome',
       data: 'Hello, world!',
@@ -73,7 +76,7 @@ function writeDefault(_req: IncomingMessage, res: ServerResponse) {
   )
 
   // For some reason, Bun seems to need this to flush
-  res.write(':\n')
+  tryWrite(res, ':\n')
 }
 
 /**
@@ -87,12 +90,13 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(formatEvent({retry: 50, data: ''}))
+  tryWrite(res, formatEvent({retry: 50, data: ''}))
 
   let counter = parseInt(getLastEventId(req) || '0', 10)
   for (let i = 0; i < 3; i++) {
     counter++
-    res.write(
+    tryWrite(
+      res,
       formatEvent({
         event: 'counter',
         data: `Counter is at ${counter}`,
@@ -114,8 +118,9 @@ function writeOne(req: IncomingMessage, res: ServerResponse) {
   })
 
   if (!last) {
-    res.write(formatEvent({retry: 50, data: ''}))
-    res.write(
+    tryWrite(res, formatEvent({retry: 50, data: ''}))
+    tryWrite(
+      res,
       formatEvent({
         event: 'progress',
         data: '100%',
@@ -136,7 +141,8 @@ async function writeSlowConnect(_req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'welcome',
       data: 'That was a slow connect, was it not?',
@@ -156,7 +162,8 @@ async function writeStalledConnection(req: IncomingMessage, res: ServerResponse)
   const lastId = getLastEventId(req)
   const reconnected = lastId === '1'
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       id: reconnected ? '2' : '1',
       event: 'welcome',
@@ -168,7 +175,8 @@ async function writeStalledConnection(req: IncomingMessage, res: ServerResponse)
 
   if (reconnected) {
     await delay(250)
-    res.write(
+    tryWrite(
+      res,
       formatEvent({
         id: '3',
         event: 'success',
@@ -189,14 +197,16 @@ async function writeUnicode(_req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'welcome',
       data: 'Connected - I will now send some chonks (cuter chunks) with unicode',
     }),
   )
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'unicode',
       data: unicodeLines[0],
@@ -206,22 +216,22 @@ async function writeUnicode(_req: IncomingMessage, res: ServerResponse) {
   await delay(100)
 
   // Start of a valid SSE chunk
-  res.write('event: unicode\ndata: ')
+  tryWrite(res, 'event: unicode\ndata: ')
 
   // Write "Espen ❤️ Kokos" in two halves:
   // 1st: Espen � [..., 226, 153]
   // 2st: � Kokos [165, 32, ...]
-  res.write(new Uint8Array([69, 115, 112, 101, 110, 32, 226, 153]))
+  tryWrite(res, new Uint8Array([69, 115, 112, 101, 110, 32, 226, 153]))
 
   // Give time to the client to process the first half
   await delay(1000)
 
-  res.write(new Uint8Array([165, 32, 75, 111, 107, 111, 115]))
+  tryWrite(res, new Uint8Array([165, 32, 75, 111, 107, 111, 115]))
 
   // Closing end of packet
-  res.write('\n\n\n\n')
+  tryWrite(res, '\n\n\n\n')
 
-  res.write(formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
+  tryWrite(res, formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
   res.end()
 }
 
@@ -232,7 +242,8 @@ async function writeTricklingConnection(_req: IncomingMessage, res: ServerRespon
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'welcome',
       data: 'Connected - now I will keep sending "comments" for a while',
@@ -241,10 +252,10 @@ async function writeTricklingConnection(_req: IncomingMessage, res: ServerRespon
 
   for (let i = 0; i < 60; i++) {
     await delay(500)
-    res.write(':\n')
+    tryWrite(res, ':\n')
   }
 
-  res.write(formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
+  tryWrite(res, formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
   res.end()
 }
 
@@ -259,7 +270,8 @@ function writeCors(req: IncomingMessage, res: ServerResponse) {
     ...cors,
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'origin',
       data: origin || '<none>',
@@ -282,7 +294,7 @@ async function writeDebug(req: IncomingMessage, res: ServerResponse) {
     bodyHash = await hash
   } catch (err: unknown) {
     res.writeHead(500, 'Internal Server Error')
-    res.write(err instanceof Error ? err.message : `${err}`)
+    tryWrite(res, err instanceof Error ? err.message : `${err}`)
     res.end()
     return
   }
@@ -293,7 +305,8 @@ async function writeDebug(req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'debug',
       data: JSON.stringify({
@@ -319,7 +332,7 @@ function writeCookies(_req: IncomingMessage, res: ServerResponse) {
     'Set-Cookie': 'someSession=someValue; Path=/authed; HttpOnly; SameSite=Lax;',
     Connection: 'keep-alive',
   })
-  res.write(JSON.stringify({cookiesWritten: true}))
+  tryWrite(res, JSON.stringify({cookiesWritten: true}))
   res.end()
 }
 
@@ -330,7 +343,8 @@ function writeAuthed(req: IncomingMessage, res: ServerResponse) {
     Connection: 'keep-alive',
   })
 
-  res.write(
+  tryWrite(
+    res,
     formatEvent({
       event: 'authInfo',
       data: JSON.stringify({cookies: req.headers.cookie || ''}),
@@ -347,7 +361,7 @@ function writeFallback(_req: IncomingMessage, res: ServerResponse) {
     Connection: 'close',
   })
 
-  res.write('File not found')
+  tryWrite(res, 'File not found')
   res.end()
 }
 
@@ -377,7 +391,7 @@ async function writeBrowserTestScript(_req: IncomingMessage, res: ServerResponse
     outdir: 'out',
   })
 
-  res.write(build.outputFiles.map((file) => file.text).join('\n\n'))
+  tryWrite(res, build.outputFiles.map((file) => file.text).join('\n\n'))
   res.end()
 }
 
@@ -442,4 +456,17 @@ export function encodeData(text: string): string {
   }
 
   return output
+}
+
+function tryWrite(res: ServerResponse, chunk: string | Uint8Array) {
+  try {
+    res.write(chunk)
+  } catch (err: unknown) {
+    // Deno randomly throws on write after close, it seems
+    if (err instanceof TypeError && err.message.includes('cannot close or enqueue')) {
+      return
+    }
+
+    throw err
+  }
 }
