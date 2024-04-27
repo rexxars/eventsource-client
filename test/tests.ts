@@ -42,6 +42,22 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('can connect using URL only', async () => {
+    const es = createEventSource(new URL(`${baseUrl}:${port}/`))
+    for await (const event of es) {
+      expect(event).toMatchObject({event: 'welcome'})
+      await deferClose(es)
+    }
+  })
+
+  test('can connect using URL string only', async () => {
+    const es = createEventSource(`${baseUrl}:${port}/`)
+    for await (const event of es) {
+      expect(event).toMatchObject({event: 'welcome'})
+      await deferClose(es)
+    }
+  })
+
   test('can handle unicode data correctly', async () => {
     const onMessage = getCallCounter()
     const es = createEventSource({

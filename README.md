@@ -95,6 +95,17 @@ console.log(es.lastEventId)
 es.close()
 ```
 
+## Minimal usage
+
+```ts
+import {createEventSource} from 'eventsource-client'
+
+const es = createEventSource('https://my-server.com/sse')
+for await (const {data} of es) {
+  console.log('Data: %s', data)
+}
+```
+
 ## Todo
 
 - [ ] Figure out what to do on broken connection on request body

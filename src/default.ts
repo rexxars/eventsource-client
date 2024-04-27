@@ -15,12 +15,14 @@ const defaultAbstractions: EnvAbstractions = {
 /**
  * Creates a new EventSource client.
  *
- * @param options - Options for the client
+ * @param optionsOrUrl - Options for the client, or an URL/URL string.
  * @returns A new EventSource client instance
  * @public
  */
-export function createEventSource(options: EventSourceOptions): EventSourceClient {
-  return createSource(options, defaultAbstractions)
+export function createEventSource(
+  optionsOrUrl: EventSourceOptions | URL | string,
+): EventSourceClient {
+  return createSource(optionsOrUrl, defaultAbstractions)
 }
 
 /**

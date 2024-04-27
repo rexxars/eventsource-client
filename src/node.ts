@@ -14,12 +14,14 @@ const nodeAbstractions: EnvAbstractions = {
 /**
  * Creates a new EventSource client.
  *
- * @param options - Options for the client
+ * @param options - Options for the client, or an URL/URL string.
  * @returns A new EventSource client instance
  * @public
  */
-export function createEventSource(options: EventSourceOptions): EventSourceClient {
-  return createSource(options, nodeAbstractions)
+export function createEventSource(
+  optionsOrUrl: EventSourceOptions | URL | string,
+): EventSourceClient {
+  return createSource(optionsOrUrl, nodeAbstractions)
 }
 
 /**

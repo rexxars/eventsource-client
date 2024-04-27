@@ -23,16 +23,19 @@ const noop = () => {
  * Creates a new EventSource client. Used internally by the environment-specific entry points,
  * and should not be used directly by consumers.
  *
- * @param optionsOrUrl - Options for the client, or an URL string.
+ * @param optionsOrUrl - Options for the client, or an URL/URL string.
  * @param abstractions - Abstractions for the environments.
  * @returns A new EventSource client instance
  * @internal
  */
 export function createEventSource(
-  optionsOrUrl: EventSourceOptions | string,
+  optionsOrUrl: EventSourceOptions | string | URL,
   {getStream}: EnvAbstractions,
 ): EventSourceClient {
-  const options = typeof optionsOrUrl === 'string' ? {url: optionsOrUrl} : optionsOrUrl
+  const options =
+    typeof optionsOrUrl === 'string' || optionsOrUrl instanceof URL
+      ? {url: optionsOrUrl}
+      : optionsOrUrl
   const {onMessage, onConnect = noop, onDisconnect = noop, onScheduleReconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent post-creation mutations to headers
