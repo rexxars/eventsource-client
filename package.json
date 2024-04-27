@@ -29,10 +29,10 @@
     "prebuild": "npm run clean",
     "prepublishOnly": "npm run build",
     "test": "npm run test:node && npm run test:browser",
-    "test:browser": "ts-node test/browser/client.browser.test.ts",
+    "test:browser": "tsx test/browser/client.browser.test.ts",
     "test:bun": "bun run test/bun/client.bun.test.ts",
     "test:deno": "deno run --allow-net --allow-read --allow-env --unstable-sloppy-imports test/deno/client.deno.test.ts",
-    "test:node": "ts-node test/node/client.node.test.ts"
+    "test:node": "tsx test/node/client.node.test.ts"
   },
   "files": [
     "dist",
@@ -80,7 +80,7 @@
     "rollup-plugin-visualizer": "^5.12.0",
     "semantic-release": "^23.0.2",
     "sinon": "^17.0.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.7.3",
     "typescript": "^5.4.2",
     "undici": "^6.7.1"
   },
