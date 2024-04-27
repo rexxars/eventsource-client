@@ -5,8 +5,8 @@ import type {
   TestPassEvent,
   TestReporter,
   TestStartEvent,
-} from '../types'
-import {getEndText, getFailText, getPassText, getStartText} from './helpers'
+} from '../types.js'
+import {getEndText, getFailText, getPassText, getStartText} from './helpers.js'
 
 export const defaultReporter: Required<Omit<TestReporter, 'onEvent'>> = {
   onStart: reportStart,

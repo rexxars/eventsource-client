@@ -8,8 +8,8 @@ import type {
   TestPassEvent,
   TestReporter,
   TestStartEvent,
-} from '../types'
-import {getEndText, getFailText, getPassText, getStartText} from './helpers'
+} from '../types.js'
+import {getEndText, getFailText, getPassText, getStartText} from './helpers.js'
 
 const CAN_USE_COLORS = canUseColors()
 

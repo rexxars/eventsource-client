@@ -1,4 +1,4 @@
-import {ExpectationError} from '../helpers'
+import {ExpectationError} from '../helpers.js'
 import type {
   TestEndEvent,
   TestEvent,
@@ -8,7 +8,7 @@ import type {
   TestRunner,
   TestRunnerOptions,
   TestStartEvent,
-} from './types'
+} from './types.js'
 
 interface TestDefinition {
   title: string

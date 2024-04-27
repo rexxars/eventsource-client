@@ -1,9 +1,9 @@
-import type {EnvAbstractions} from './abstractions'
-import {createEventSource as createSource} from './client'
-import type {EventSourceClient, EventSourceOptions} from './types'
+import type {EnvAbstractions} from './abstractions.js'
+import {createEventSource as createSource} from './client.js'
+import type {EventSourceClient, EventSourceOptions} from './types.js'
 
-export * from './constants'
-export * from './types'
+export * from './constants.js'
+export * from './types.js'
 
 /**
  * Default "abstractions", eg when all the APIs are globally available

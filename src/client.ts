@@ -1,7 +1,7 @@
 import {createParser, type ParseEvent} from 'eventsource-parser'
 
-import type {EnvAbstractions, EventSourceAsyncValueResolver} from './abstractions'
-import {CLOSED, CONNECTING, OPEN} from './constants'
+import type {EnvAbstractions, EventSourceAsyncValueResolver} from './abstractions.js'
+import {CLOSED, CONNECTING, OPEN} from './constants.js'
 import type {
   EventSourceClient,
   EventSourceMessage,
@@ -10,7 +10,7 @@ import type {
   FetchLikeInit,
   FetchLikeResponse,
   ReadyState,
-} from './types'
+} from './types.js'
 
 /**
  * Intentional noop function for eased control flow

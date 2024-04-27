@@ -1,4 +1,4 @@
-import type {EventSourceMessage} from './types'
+import type {EventSourceMessage} from './types.js'
 
 /**
  * Internal abstractions over environment-specific APIs, to keep node-specifics

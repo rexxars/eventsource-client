@@ -1,8 +1,8 @@
-import {createEventSource} from '../../src/default'
-import {getServer} from '../server'
-import {registerTests} from '../tests'
-import {createRunner} from '../waffletest'
-import {nodeReporter} from '../waffletest/reporters/nodeReporter'
+import {createEventSource} from '../../src/default.js'
+import {getServer} from '../server.js'
+import {registerTests} from '../tests.js'
+import {createRunner} from '../waffletest/index.js'
+import {nodeReporter} from '../waffletest/reporters/nodeReporter.js'
 
 const BUN_TEST_PORT = 3946
 

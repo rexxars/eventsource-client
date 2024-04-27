@@ -5,7 +5,7 @@ import {resolve as resolvePath} from 'node:path'
 
 import esbuild from 'esbuild'
 
-import {unicodeLines} from './fixtures'
+import {unicodeLines} from './fixtures.js'
 
 export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {

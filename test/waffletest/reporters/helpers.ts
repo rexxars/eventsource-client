@@ -1,4 +1,4 @@
-import type {TestEndEvent, TestFailEvent, TestPassEvent, TestStartEvent} from '../types'
+import type {TestEndEvent, TestFailEvent, TestPassEvent, TestStartEvent} from '../types.js'
 
 export function indent(str: string, spaces: number): string {
   return str

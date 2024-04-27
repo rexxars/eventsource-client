@@ -7,11 +7,11 @@
  * Could we use a testing library? Yes.
  * Would that add a whole lot of value? No.
  */
-import {createEventSource} from '../../src/node'
-import {getServer} from '../server'
-import {registerTests} from '../tests'
-import {nodeReporter} from '../waffletest/reporters/nodeReporter'
-import {createRunner} from '../waffletest/runner'
+import {createEventSource} from '../../src/node.js'
+import {getServer} from '../server.js'
+import {registerTests} from '../tests.js'
+import {nodeReporter} from '../waffletest/reporters/nodeReporter.js'
+import {createRunner} from '../waffletest/runner.js'
 
 const NODE_TEST_PORT = 3945
 

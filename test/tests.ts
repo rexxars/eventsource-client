@@ -1,8 +1,8 @@
-import {CLOSED, CONNECTING, OPEN} from '../src/constants'
-import type {createEventSource as CreateEventSourceFn, EventSourceMessage} from '../src/default'
-import {unicodeLines} from './fixtures'
-import {deferClose, expect, getCallCounter} from './helpers'
-import type {TestRunner} from './waffletest'
+import {CLOSED, CONNECTING, OPEN} from '../src/constants.js'
+import type {createEventSource as CreateEventSourceFn, EventSourceMessage} from '../src/default.js'
+import {unicodeLines} from './fixtures.js'
+import {deferClose, expect, getCallCounter} from './helpers.js'
+import type {TestRunner} from './waffletest/index.js'
 
 export function registerTests(options: {
   environment: string

@@ -1,6 +1,6 @@
 import sinon, {type SinonSpy} from 'sinon'
 
-import type {EventSourceClient} from '../src/types'
+import type {EventSourceClient} from '../src/types.js'
 
 type MessageReceiver = SinonSpy & {waitForCallCount: (num: number) => Promise<void>}
 

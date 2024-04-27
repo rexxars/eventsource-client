@@ -1,9 +1,9 @@
 /**
  * Compiled by ESBuild for the browser
  */
-import {createEventSource} from '../../src/default'
-import {registerTests} from '../tests'
-import {createRunner, type TestEvent} from '../waffletest'
+import {createEventSource} from '../../src/default.js'
+import {registerTests} from '../tests.js'
+import {createRunner, type TestEvent} from '../waffletest/index.js'
 
 if (!windowHasBeenExtended(window)) {
   throw new Error('window.reportTest has not been defined by playwright')
