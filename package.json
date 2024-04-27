@@ -11,6 +11,8 @@
     ".": {
       "types": "./dist/default.d.ts",
       "source": "./src/default.ts",
+      "deno": "./dist/default.esm.js",
+      "bun": "./dist/default.esm.js",
       "node": {
         "import": "./dist/node.cjs.mjs",
         "require": "./dist/node.js"
