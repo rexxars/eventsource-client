@@ -71,6 +71,7 @@ export interface EventSourceOptions {
   credentials?: 'include' | 'omit' | 'same-origin'
 
   /** A BodyInit object or null to set request's body. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any
 
   /** A string to set request's method. */
@@ -120,6 +121,7 @@ export interface FetchLikeInit {
   method?: string
 
   /** An AbortSignal to set request's signal. Typed as `any` because of polyfill inconsistencies. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signal?: {aborted: boolean} | any
 
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
@@ -135,6 +137,7 @@ export interface FetchLikeInit {
   cache?: 'no-store'
 
   /** Request body. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any
 
   /** A string indicating whether request follows redirects, results in an error upon encountering a redirect, or returns the redirect (in an opaque fashion). Sets request's redirect. */
@@ -153,6 +156,7 @@ export interface FetchLikeInit {
  * @public
  */
 export interface FetchLikeResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly body: NodeJS.ReadableStream | NodeWebReadableStream<any> | Response['body'] | null
   readonly url: string
   readonly status: number

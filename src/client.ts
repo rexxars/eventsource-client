@@ -187,6 +187,7 @@ export function createEventSource(
 
     // Ensure that the response stream is a web stream
     // @todo Figure out a way to make this work without casting
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bodyStream = getStream(body as any)
 
     // EventSources are always UTF-8 per spec

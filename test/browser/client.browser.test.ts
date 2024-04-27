@@ -16,14 +16,15 @@
  * --no-headless
  * --serial
  */
-import {chromium, firefox, webkit, type BrowserType} from 'playwright'
+import {type BrowserType, chromium, firefox, webkit} from 'playwright'
+
 import {getServer} from '../server'
 import {type TestEvent} from '../waffletest'
 import {nodeReporter} from '../waffletest/reporters/nodeReporter'
 
 type BrowserName = 'firefox' | 'chromium' | 'webkit'
 
-const browsers: Record<BrowserName, BrowserType<{}>> = {
+const browsers: Record<BrowserName, BrowserType> = {
   firefox,
   chromium,
   webkit,
@@ -98,6 +99,7 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
           reportEnd(event)
           break
         default:
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           throw new Error(`Unexpected event: ${(event as any).event}`)
       }
     }
@@ -115,31 +117,36 @@ const browserFlagType = isDefinedBrowserType(browserFlag) ? browsers[browserFlag
   }
 })()
 
-function runBrowserTest(browserType: BrowserType): Promise<TestEvent[]> {
-  return new Promise(async (resolve) => {
-    const domain = getBaseUrl(BROWSER_TEST_PORT)
-    const browser = await browserType.launch({headless: !NO_HEADLESS})
-    const context = await browser.newContext()
-    await context.clearCookies()
-
-    const page = await context.newPage()
-    const events: TestEvent[] = []
-
-    await page.exposeFunction('reportTest', async (event: TestEvent) => {
-      events.push(event)
-
-      if (event.event !== 'end') {
-        return
-      }
-
-      // Teardown
-      await context.close()
-      await browser.close()
-      resolve(events)
-    })
-
-    await page.goto(`${domain}/browser-test`)
+async function runBrowserTest(browserType: BrowserType): Promise<TestEvent[]> {
+  let resolve: (value: TestEvent[] | PromiseLike<TestEvent[]>) => void
+  const promise = new Promise<TestEvent[]>((_resolve) => {
+    resolve = _resolve
   })
+
+  const domain = getBaseUrl(BROWSER_TEST_PORT)
+  const browser = await browserType.launch({headless: !NO_HEADLESS})
+  const context = await browser.newContext()
+  await context.clearCookies()
+
+  const page = await context.newPage()
+  const events: TestEvent[] = []
+
+  await page.exposeFunction('reportTest', async (event: TestEvent) => {
+    events.push(event)
+
+    if (event.event !== 'end') {
+      return
+    }
+
+    // Teardown
+    await context.close()
+    await browser.close()
+    resolve(events)
+  })
+
+  await page.goto(`${domain}/browser-test`)
+
+  return promise
 }
 
 function isDefinedBrowserType(browserName: string | undefined): browserName is BrowserName {
