@@ -5,6 +5,8 @@ import {resolve as resolvePath} from 'node:path'
 
 import esbuild from 'esbuild'
 
+import {unicodeLines} from './fixtures'
+
 export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
     const server = createServer(onRequest)
@@ -14,6 +16,11 @@ export function getServer(port: number): Promise<Server> {
 }
 
 function onRequest(req: IncomingMessage, res: ServerResponse) {
+  // Disable Nagle's algorithm for testing
+  if (res.socket) {
+    res.socket.setNoDelay(true)
+  }
+
   switch (req.url) {
     // Server-Sent Event endpoints
     case '/':
@@ -36,6 +43,8 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeStalledConnection(req, res)
     case '/trickle':
       return writeTricklingConnection(req, res)
+    case '/unicode':
+      return writeUnicode(req, res)
 
     // Browser test endpoints (HTML/JS)
     case '/browser-test':
@@ -168,6 +177,49 @@ async function writeStalledConnection(req: IncomingMessage, res: ServerResponse)
   }
 
   // Intentionally not closing on first-connect that never sends data after welcome
+}
+
+async function writeUnicode(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  res.write(
+    formatEvent({
+      event: 'welcome',
+      data: 'Connected - I will now send some chonks (cuter chunks) with unicode',
+    }),
+  )
+
+  res.write(
+    formatEvent({
+      event: 'unicode',
+      data: unicodeLines[0],
+    }),
+  )
+
+  await delay(100)
+
+  // Start of a valid SSE chunk
+  res.write('event: unicode\ndata: ')
+
+  // Write "Espen ❤️ Kokos" in two halves:
+  // 1st: Espen � [..., 226, 153]
+  // 2st: � Kokos [165, 32, ...]
+  res.write(new Uint8Array([69, 115, 112, 101, 110, 32, 226, 153]))
+
+  // Give time to the client to process the first half
+  await delay(1000)
+
+  res.write(new Uint8Array([165, 32, 75, 111, 107, 111, 115]))
+
+  // Closing end of packet
+  res.write('\n\n\n\n')
+
+  res.write(formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
+  res.end()
 }
 
 async function writeTricklingConnection(_req: IncomingMessage, res: ServerResponse) {

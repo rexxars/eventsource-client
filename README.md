@@ -35,7 +35,7 @@ npm install --save eventsource-client
 - Firefox >= 105
 - Edge >= 79
 
-Basically, any environment that supports the [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) (with [pipeThrough](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream/pipeThrough) support) and the [TextDecoderStream](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoderStream) APIs.
+Basically, any environment that supports the [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) and the [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder) APIs.
 
 ## Usage (async iterator)
 
@@ -96,7 +96,7 @@ es.close()
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Deno support/tests
-- [ ] Bun support/tests (blocked: no `TextDecoderStream` support)
+- [ ] Bun support/tests
 - [ ] Consider legacy build
 
 ## License

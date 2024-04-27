@@ -1,5 +1,6 @@
 import {CLOSED, CONNECTING, OPEN} from '../src/constants'
-import type {createEventSource as CreateEventSourceFn} from '../src/default'
+import type {createEventSource as CreateEventSourceFn, EventSourceMessage} from '../src/default'
+import {unicodeLines} from './fixtures'
 import {deferClose, expect, getCallCounter} from './helpers'
 import type {TestRunner} from './waffletest'
 
@@ -37,6 +38,31 @@ export function registerTests(options: {
       event: 'welcome',
       id: undefined,
     })
+
+    await deferClose(es)
+  })
+
+  test('can handle unicode data correctly', async () => {
+    const onMessage = getCallCounter()
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/unicode`),
+      fetch,
+      onMessage,
+    })
+
+    const messages: EventSourceMessage[] = []
+    for await (const event of es) {
+      if (event.event === 'unicode') {
+        messages.push(event)
+      }
+
+      if (messages.length === 2) {
+        break
+      }
+    }
+
+    expect(messages[0].data).toBe(unicodeLines[0])
+    expect(messages[1].data).toBe(unicodeLines[1])
 
     await deferClose(es)
   })

@@ -188,10 +188,9 @@ export function createEventSource(
     // Ensure that the response stream is a web stream
     // @todo Figure out a way to make this work without casting
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bodyStream = getStream(body as any)
+    const stream = getStream(body as any)
+    const decoder = new TextDecoder()
 
-    // EventSources are always UTF-8 per spec
-    const stream = bodyStream.pipeThrough<string>(new TextDecoderStream())
     const reader = stream.getReader()
     let open = true
 
@@ -199,8 +198,11 @@ export function createEventSource(
 
     do {
       const {done, value} = await reader.read()
+      if (value) {
+        parser.feed(decoder.decode(value, {stream: !done}))
+      }
+
       if (!done) {
-        parser.feed(value)
         continue
       }
 
