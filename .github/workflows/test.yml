@@ -1,6 +1,13 @@
 name: Test
 on:
   push:
+  workflow_dispatch:
+    inputs:
+      bun:
+        description: 'Test on bun'
+        required: true
+        default: false
+        type: boolean
 jobs:
   testBrowser:
     timeout-minutes: 15
@@ -57,6 +64,7 @@ jobs:
         run: npm run test:node
 
   testBun:
+    if: always() && github.event.inputs.bun == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     continue-on-error: true
