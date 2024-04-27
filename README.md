@@ -30,12 +30,17 @@ npm install --save eventsource-client
 ## Supported engines
 
 - Node.js >= 18
-- Chrome >= 71
-- Safari >= 14.1
-- Firefox >= 105
+- Chrome >= 63
+- Safari >= 11.3
+- Firefox >= 65
 - Edge >= 79
+- Partial: Bun (has [issues with unicode](https://github.com/oven-sh/bun/issues/5542))
 
-Basically, any environment that supports the [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) and the [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder) APIs.
+Basically, any environment that supports:
+
+- [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+- [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder) with `stream` option
+- [Symbol.asyncIterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator)
 
 ## Usage (async iterator)
 
@@ -96,7 +101,6 @@ es.close()
 - [ ] Configurable stalled connection detection (eg no data)
 - [ ] Configurable reconnection policy
 - [ ] Deno support/tests
-- [ ] Bun support/tests
 - [ ] Consider legacy build
 
 ## License
