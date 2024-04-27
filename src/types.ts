@@ -19,6 +19,9 @@ export interface EventSourceClient {
   /** Connect to the event source. Automatically called on creation - you only need to call this after manually calling `close()`, when server has sent an HTTP 204, or the server responded with a non-retryable error. */
   connect(): void
 
+  /** Warns when attempting to iterate synchronously */
+  [Symbol.iterator](): never
+
   /** Async iterator of messages received */
   [Symbol.asyncIterator](): AsyncIterableIterator<EventSourceMessage>
 

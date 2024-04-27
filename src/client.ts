@@ -23,15 +23,16 @@ const noop = () => {
  * Creates a new EventSource client. Used internally by the environment-specific entry points,
  * and should not be used directly by consumers.
  *
- * @param options - Options for the client.
+ * @param optionsOrUrl - Options for the client, or an URL string.
  * @param abstractions - Abstractions for the environments.
  * @returns A new EventSource client instance
  * @internal
  */
 export function createEventSource(
-  options: EventSourceOptions,
+  optionsOrUrl: EventSourceOptions | string,
   {getStream}: EnvAbstractions,
 ): EventSourceClient {
+  const options = typeof optionsOrUrl === 'string' ? {url: optionsOrUrl} : optionsOrUrl
   const {onMessage, onConnect = noop, onDisconnect = noop, onScheduleReconnect = noop} = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent post-creation mutations to headers
@@ -56,6 +57,11 @@ export function createEventSource(
   return {
     close,
     connect,
+    [Symbol.iterator]: () => {
+      throw new Error(
+        'EventSource does not support synchronous iteration. Use `for await` instead.',
+      )
+    },
     [Symbol.asyncIterator]: getEventIterator,
     get lastEventId() {
       return lastEventId
