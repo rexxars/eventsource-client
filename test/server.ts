@@ -71,6 +71,9 @@ function writeDefault(_req: IncomingMessage, res: ServerResponse) {
       data: 'Hello, world!',
     }),
   )
+
+  // For some reason, Bun seems to need this to flush
+  res.write(':\n')
 }
 
 /**

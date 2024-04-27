@@ -1,0 +1,17 @@
+name: Bun tests
+on:
+  push:
+jobs:
+  testBun:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+      - name: Run tests
+        run: npm run test:bun
