@@ -34,7 +34,8 @@ npm install --save eventsource-client
 - Safari >= 11.3
 - Firefox >= 65
 - Edge >= 79
-- Partial: Bun (has [issues with unicode](https://github.com/oven-sh/bun/issues/5542))
+- Deno >= 1.30
+- _Partial:_ Bun (has [issues with unicode](https://github.com/oven-sh/bun/issues/5542))
 
 Basically, any environment that supports:
 
