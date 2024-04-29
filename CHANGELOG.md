@@ -5,6 +5,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.0](https://github.com/rexxars/eventsource-client/compare/v1.0.0...v1.1.0) (2024-04-29)
+
+### Features
+
+- allow specifying only URL instead of options object ([d9b0614](https://github.com/rexxars/eventsource-client/commit/d9b061443b983fc0c38c67adce5718d095fa2a39))
+- support environments without TextDecoderStream support ([e97538f](https://github.com/rexxars/eventsource-client/commit/e97538f57a78867910d7d943ced49902c8e80f62))
+- warn when attempting to iterate syncronously ([c639b09](https://github.com/rexxars/eventsource-client/commit/c639b0962c9b0e71a0534f8ba8278e06c347afc7))
+
+### Bug Fixes
+
+- specify preferred builds for deno and bun ([b59f3f5](https://github.com/rexxars/eventsource-client/commit/b59f3f50059152c791f597cae8639d1b8f75e2be))
+- upgrade dependencies, sort imports ([8e0c7a1](https://github.com/rexxars/eventsource-client/commit/8e0c7a10f70b361a8550c94024e152f1485348db))
+
 ## 1.0.0 (2023-11-14)
 
 ### ⚠ BREAKING CHANGES
