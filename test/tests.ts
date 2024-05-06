@@ -122,12 +122,14 @@ export function registerTests(options: {
     const request = fetch || globalThis.fetch
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()
+    const onScheduleReconnect = getCallCounter()
     const url = `${baseUrl}:${port}/identified?id=explicit-close-no-reconnect`
     const es = createEventSource({
       url,
       fetch,
       onMessage,
       onDisconnect,
+      onScheduleReconnect,
     })
 
     // Should receive a message containing the number of listeners on the given ID
@@ -140,6 +142,7 @@ export function registerTests(options: {
     es.close()
     expect(es.readyState).toBe(CLOSED)
     expect(onMessage.callCount).toBe(1)
+    expect(onScheduleReconnect.callCount).toBe(0)
 
     // After 500 ms, there should be no clients connected to the given ID
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -148,6 +151,8 @@ export function registerTests(options: {
     // Wait another 500 ms, just to be sure there are no slow reconnects
     await new Promise((resolve) => setTimeout(resolve, 500))
     expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+
+    expect(onScheduleReconnect.callCount).toBe(0)
   })
 
   test('can use async iterator, reconnects transparently', async () => {
