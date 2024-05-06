@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/rexxars/eventsource-client/compare/v1.1.0...v1.1.1) (2024-05-06)
+
+### Bug Fixes
+
+- stray reconnect after close ([3b13da7](https://github.com/rexxars/eventsource-client/commit/3b13da756d4a82b34b3e36651025989db3cf5ae8)), closes [#2](https://github.com/rexxars/eventsource-client/issues/2)
+
 ## [1.1.0](https://github.com/rexxars/eventsource-client/compare/v1.0.0...v1.1.0) (2024-04-29)
 
 ### Features
