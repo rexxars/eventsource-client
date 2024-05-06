@@ -6,6 +6,7 @@ import {resolve as resolvePath} from 'node:path'
 import esbuild from 'esbuild'
 
 import {unicodeLines} from './fixtures.js'
+import {waitForClose} from './helpers.js'
 
 const isDeno = typeof globalThis.Deno !== 'undefined'
 const idedListeners = new Map<string, Set<ServerResponse>>()
@@ -113,7 +114,7 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
   res.end()
 }
 
-function writeIdentifiedListeners(req: IncomingMessage, res: ServerResponse) {
+async function writeIdentifiedListeners(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url || '/', 'http://localhost')
   const id = url.searchParams.get('id')
   if (!id) {
@@ -137,7 +138,9 @@ function writeIdentifiedListeners(req: IncomingMessage, res: ServerResponse) {
     })
     tryWrite(res, formatEvent({data: '', retry: 250}))
     tryWrite(res, formatEvent({data: `${idedListeners.size}`}))
-    res.on('close', () => (idedListeners.get(id) || new Set()).delete(res))
+
+    await waitForClose(res)
+    ;(idedListeners.get(id) || new Set()).delete(res)
     return
   }
 

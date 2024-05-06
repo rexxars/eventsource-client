@@ -1,3 +1,4 @@
+import type {ServerResponse} from 'http'
 import sinon, {type SinonSpy} from 'sinon'
 
 import type {EventSourceClient} from '../src/types.js'
@@ -42,6 +43,47 @@ export function getCallCounter(onCall?: (info: {numCalls: number}) => void): Mes
 
 export function deferClose(es: EventSourceClient, timeout = 25): Promise<void> {
   return new Promise((resolve) => setTimeout(() => resolve(es.close()), timeout))
+}
+
+export async function waitForClose(res: ServerResponse): Promise<void> {
+  let resolve
+  let reject
+  const promise = new Promise<void>((_resolve, _reject) => {
+    resolve = _resolve
+    reject = _reject
+  })
+
+  let hasTimedOut = false
+  res.once('close', () => resolve())
+  const timeout = setTimeout(() => {
+    hasTimedOut = true
+    reject(new Error('Timeout waiting for close'))
+  }, 15000)
+
+  if (typeof globalThis.Deno === 'undefined') {
+    return promise
+  }
+
+  // Deno does not trigger close event, apparently, so we'll have to try to write,
+  // then catch the error that occurs upon a close
+  for (;;) {
+    if (hasTimedOut) {
+      return promise
+    }
+
+    try {
+      res.write(':\n')
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('cannot close or enqueue')) {
+        clearTimeout(timeout)
+        resolve()
+        return promise
+      }
+      throw err
+    }
+
+    await new Promise((waitResolve) => setTimeout(waitResolve, 100))
+  }
 }
 
 export function expect(thing: unknown): {
