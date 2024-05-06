@@ -8,6 +8,7 @@ import esbuild from 'esbuild'
 import {unicodeLines} from './fixtures.js'
 
 const isDeno = typeof globalThis.Deno !== 'undefined'
+const idedListeners = new Map<string, Set<ServerResponse>>()
 
 export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
@@ -23,12 +24,15 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
     res.socket.setNoDelay(true)
   }
 
-  switch (req.url) {
+  const path = new URL(req.url || '/', 'http://localhost').pathname
+  switch (path) {
     // Server-Sent Event endpoints
     case '/':
       return writeDefault(req, res)
     case '/counter':
       return writeCounter(req, res)
+    case '/identified':
+      return writeIdentifiedListeners(req, res)
     case '/end-after-one':
       return writeOne(req, res)
     case '/slow-connect':
@@ -106,6 +110,42 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
     await delay(25)
   }
 
+  res.end()
+}
+
+function writeIdentifiedListeners(req: IncomingMessage, res: ServerResponse) {
+  const url = new URL(req.url || '/', 'http://localhost')
+  const id = url.searchParams.get('id')
+  if (!id) {
+    res.writeHead(400, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+    tryWrite(res, JSON.stringify({error: 'Missing "id" query parameter'}))
+    res.end()
+    return
+  }
+
+  if ((req.headers.accept || '').includes('text/event-stream')) {
+    const current = (idedListeners.get(id) || new Set()).add(res)
+    idedListeners.set(id, current)
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+    tryWrite(res, formatEvent({data: '', retry: 250}))
+    tryWrite(res, formatEvent({data: `${idedListeners.size}`}))
+    res.on('close', () => (idedListeners.get(id) || new Set()).delete(res))
+    return
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+  })
+  tryWrite(res, JSON.stringify({numListeners: (idedListeners.get(id) || new Set()).size}))
   res.end()
 }
 

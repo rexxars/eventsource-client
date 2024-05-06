@@ -118,6 +118,38 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('will not reconnect after explicit close()', async () => {
+    const request = fetch || globalThis.fetch
+    const onMessage = getCallCounter()
+    const onDisconnect = getCallCounter()
+    const url = `${baseUrl}:${port}/identified?id=explicit-close-no-reconnect`
+    const es = createEventSource({
+      url,
+      fetch,
+      onMessage,
+      onDisconnect,
+    })
+
+    // Should receive a message containing the number of listeners on the given ID
+    await onMessage.waitForCallCount(1)
+    expect(onMessage.lastCall.lastArg).toMatchObject({data: '1'})
+    expect(es.readyState).toBe(OPEN) // Open (connected)
+
+    // Explicitly disconnect. Should normally reconnect within ~250ms (server sends retry: 250)
+    // but we'll close it before that happens
+    es.close()
+    expect(es.readyState).toBe(CLOSED)
+    expect(onMessage.callCount).toBe(1)
+
+    // After 500 ms, there should be no clients connected to the given ID
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+
+    // Wait another 500 ms, just to be sure there are no slow reconnects
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+  })
+
   test('can use async iterator, reconnects transparently', async () => {
     const onDisconnect = getCallCounter()
     const url = `${baseUrl}:${port}/counter`
