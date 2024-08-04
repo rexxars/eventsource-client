@@ -25,6 +25,7 @@
   },
   "scripts": {
     "build": "pkg-utils build && pkg-utils --strict",
+    "build:watch": "pkg-utils watch",
     "clean": "rimraf dist coverage",
     "lint": "eslint . && tsc --noEmit",
     "posttest": "npm run lint",
