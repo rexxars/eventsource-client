@@ -128,22 +128,34 @@ async function writeIdentifiedListeners(req: IncomingMessage, res: ServerRespons
     return
   }
 
+  // SSE endpoint, tracks how many listeners are connected to a specific ID
   if ((req.headers.accept || '').includes('text/event-stream')) {
-    const current = (idedListeners.get(id) || new Set()).add(res)
-    idedListeners.set(id, current)
+    let currentSet = idedListeners.get(id)
+    if (currentSet) {
+      currentSet.add(res)
+    } else {
+      currentSet = new Set<ServerResponse>([res])
+      idedListeners.set(id, currentSet)
+    }
+
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
     })
     tryWrite(res, formatEvent({data: '', retry: 250}))
-    tryWrite(res, formatEvent({data: `${idedListeners.size}`}))
+    tryWrite(res, formatEvent({data: `${currentSet.size}`}))
+
+    if (url.searchParams.get('auto-close')) {
+      res.end()
+    }
 
     await waitForClose(res)
-    ;(idedListeners.get(id) || new Set()).delete(res)
+    currentSet.delete(res)
     return
   }
 
+  // JSON endpoint, returns the number of listeners connected to a specific ID
   res.writeHead(200, {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
