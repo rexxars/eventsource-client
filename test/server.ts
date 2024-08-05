@@ -6,10 +6,10 @@ import {resolve as resolvePath} from 'node:path'
 import esbuild from 'esbuild'
 
 import {unicodeLines} from './fixtures.js'
-import {waitForClose} from './helpers.js'
 
 const isDeno = typeof globalThis.Deno !== 'undefined'
-const idedListeners = new Map<string, Set<ServerResponse>>()
+/* {[client id]: number of connects} */
+const connectCounts = new Map<string, number>()
 
 export function getServer(port: number): Promise<Server> {
   return new Promise((resolve, reject) => {
@@ -116,27 +116,21 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
 
 async function writeIdentifiedListeners(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url || '/', 'http://localhost')
-  const id = url.searchParams.get('id')
-  if (!id) {
+  const clientId = url.searchParams.get('client-id')
+  if (!clientId) {
     res.writeHead(400, {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
     })
-    tryWrite(res, JSON.stringify({error: 'Missing "id" query parameter'}))
+    tryWrite(res, JSON.stringify({error: 'Missing "id" or "client-id" query parameter'}))
     res.end()
     return
   }
 
-  // SSE endpoint, tracks how many listeners are connected to a specific ID
+  // SSE endpoint, tracks how many listeners have connected with a given client ID
   if ((req.headers.accept || '').includes('text/event-stream')) {
-    let currentSet = idedListeners.get(id)
-    if (currentSet) {
-      currentSet.add(res)
-    } else {
-      currentSet = new Set<ServerResponse>([res])
-      idedListeners.set(id, currentSet)
-    }
+    connectCounts.set(clientId, (connectCounts.get(clientId) || 0) + 1)
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -144,23 +138,21 @@ async function writeIdentifiedListeners(req: IncomingMessage, res: ServerRespons
       Connection: 'keep-alive',
     })
     tryWrite(res, formatEvent({data: '', retry: 250}))
-    tryWrite(res, formatEvent({data: `${currentSet.size}`}))
+    tryWrite(res, formatEvent({data: `${connectCounts.get(clientId)}`}))
 
     if (url.searchParams.get('auto-close')) {
       res.end()
     }
 
-    await waitForClose(res)
-    currentSet.delete(res)
     return
   }
 
-  // JSON endpoint, returns the number of listeners connected to a specific ID
+  // JSON endpoint, returns the number of connects for a given client ID
   res.writeHead(200, {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
   })
-  tryWrite(res, JSON.stringify({numListeners: (idedListeners.get(id) || new Set()).size}))
+  tryWrite(res, JSON.stringify({clientIdConnects: connectCounts.get(clientId) ?? 0}))
   res.end()
 }
 

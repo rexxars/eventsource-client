@@ -123,7 +123,8 @@ export function registerTests(options: {
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()
     const onScheduleReconnect = getCallCounter()
-    const url = `${baseUrl}:${port}/identified?id=explicit-close-no-reconnect`
+    const clientId = Math.random().toString(36).slice(2)
+    const url = `${baseUrl}:${port}/identified?client-id=${clientId}`
     const es = createEventSource({
       url,
       fetch,
@@ -144,13 +145,13 @@ export function registerTests(options: {
     expect(onMessage.callCount).toBe(1)
     expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
 
-    // After 500 ms, there should be no clients connected to the given ID
+    // After 500 ms, there should still only be a single connect with this client ID
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
 
     // Wait another 500 ms, just to be sure there are no slow reconnects
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
 
     expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
   })
@@ -160,7 +161,8 @@ export function registerTests(options: {
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter(() => es.close())
     const onScheduleReconnect = getCallCounter()
-    const url = `${baseUrl}:${port}/identified?id=close-in-ondisconnect&auto-close=true`
+    const clientId = Math.random().toString(36).slice(2)
+    const url = `${baseUrl}:${port}/identified?client-id=${clientId}&auto-close=true`
     const es = createEventSource({
       url,
       fetch,
@@ -182,12 +184,12 @@ export function registerTests(options: {
 
     // After 500 ms, there should be no clients connected to the given ID
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
     expect(es.readyState, 'readyState').toBe(CLOSED)
 
     // Wait another 500 ms, just to be sure there are no slow reconnects
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
     expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
