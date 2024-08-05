@@ -86,7 +86,10 @@ export async function waitForClose(res: ServerResponse): Promise<void> {
   }
 }
 
-export function expect(thing: unknown): {
+export function expect(
+  thing: unknown,
+  descriptor: string = '',
+): {
   toBe(expected: unknown): void
   toBeLessThan(thanNum: number): void
   toMatchObject(expected: Record<string, unknown>): void
@@ -94,9 +97,19 @@ export function expect(thing: unknown): {
 } {
   return {
     toBe(expected: unknown) {
-      if (thing !== expected) {
-        throw new ExpectationError(`Expected ${thing} to be ${expected}`)
+      if (thing === expected) {
+        return
       }
+
+      if (descriptor) {
+        throw new ExpectationError(
+          `Expected ${descriptor} to be ${JSON.stringify(expected)}, got ${JSON.stringify(thing)}`,
+        )
+      }
+
+      throw new ExpectationError(
+        `Expected ${JSON.stringify(thing)} to be ${JSON.stringify(expected)}`,
+      )
     },
 
     toBeLessThan(thanNum: number) {
@@ -112,12 +125,14 @@ export function expect(thing: unknown): {
 
       Object.keys(expected).forEach((key) => {
         if (!(key in thing)) {
-          throw new ExpectationError(`Expected key "${key}" to be in object, was not`)
+          throw new ExpectationError(
+            `Expected key "${key}" to be in ${descriptor || 'object'}, was not`,
+          )
         }
 
         if (thing[key] !== expected[key]) {
           throw new ExpectationError(
-            `Expected key "${key}" to be ${JSON.stringify(expected[key])}, was ${JSON.stringify(
+            `Expected key "${key}" of ${descriptor || 'object'} to be ${JSON.stringify(expected[key])}, was ${JSON.stringify(
               thing[key],
             )}`,
           )
