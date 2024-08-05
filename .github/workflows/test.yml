@@ -10,6 +10,7 @@ on:
         type: boolean
 jobs:
   testBrowser:
+    name: 'Test: Browsers'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +39,7 @@ jobs:
         run: npm run test:browser
 
   testNode:
+    name: 'Test: Node.js ${{ matrix.node-version }}'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
@@ -68,6 +70,7 @@ jobs:
         run: npm run test:node
 
   testDeno:
+    name: 'Test: Deno'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -79,6 +82,7 @@ jobs:
         run: npm run test:deno
 
   testBun:
+    name: 'Test: Bun'
     if: always() && github.event.inputs.bun == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest

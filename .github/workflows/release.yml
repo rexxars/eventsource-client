@@ -26,6 +26,7 @@ concurrency:
 jobs:
   release:
     # only run if opt-in during workflow_dispatch
+    name: 'Release: Publish to NPM'
     if: always() && github.event.inputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
