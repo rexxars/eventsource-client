@@ -96,11 +96,11 @@ export function registerTests(options: {
 
     // While still receiving messages (we receive 3 at a time before it disconnects)
     await onMessage.waitForCallCount(1)
-    expect(es.readyState).toBe(OPEN) // Open (connected)
+    expect(es.readyState, 'readyState').toBe(OPEN) // Open (connected)
 
     // While waiting for reconnect (after 3 messages it will disconnect and reconnect)
     await onDisconnect.waitForCallCount(1)
-    expect(es.readyState).toBe(CONNECTING) // Connecting (reconnecting)
+    expect(es.readyState, 'readyState').toBe(CONNECTING) // Connecting (reconnecting)
     expect(onMessage.callCount).toBe(3)
 
     // Will reconnect infinitely, stop at 8 messages
@@ -118,7 +118,7 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
-  test('will not reconnect after explicit close()', async () => {
+  test('will not reconnect after explicit `close()`', async () => {
     const request = fetch || globalThis.fetch
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()
@@ -135,14 +135,14 @@ export function registerTests(options: {
     // Should receive a message containing the number of listeners on the given ID
     await onMessage.waitForCallCount(1)
     expect(onMessage.lastCall.lastArg).toMatchObject({data: '1'})
-    expect(es.readyState).toBe(OPEN) // Open (connected)
+    expect(es.readyState, 'readyState').toBe(OPEN) // Open (connected)
 
     // Explicitly disconnect. Should normally reconnect within ~250ms (server sends retry: 250)
     // but we'll close it before that happens
     es.close()
-    expect(es.readyState).toBe(CLOSED)
+    expect(es.readyState, 'readyState').toBe(CLOSED)
     expect(onMessage.callCount).toBe(1)
-    expect(onScheduleReconnect.callCount).toBe(0)
+    expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
 
     // After 500 ms, there should be no clients connected to the given ID
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -152,7 +152,43 @@ export function registerTests(options: {
     await new Promise((resolve) => setTimeout(resolve, 500))
     expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
 
-    expect(onScheduleReconnect.callCount).toBe(0)
+    expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
+  })
+
+  test('will not reconnect after explicit `close()` in `onDisconnect`', async () => {
+    const request = fetch || globalThis.fetch
+    const onMessage = getCallCounter()
+    const onDisconnect = getCallCounter(() => es.close())
+    const onScheduleReconnect = getCallCounter()
+    const url = `${baseUrl}:${port}/identified?id=close-in-ondisconnect&auto-close=true`
+    const es = createEventSource({
+      url,
+      fetch,
+      onMessage,
+      onDisconnect,
+      onScheduleReconnect,
+    })
+
+    // Should receive a message containing the number of listeners on the given ID
+    await onMessage.waitForCallCount(1)
+    expect(onMessage.lastCall.lastArg, 'onMessage `event` argument').toMatchObject({data: '1'})
+    expect(es.readyState, 'readyState').toBe(OPEN) // Open (connected)
+
+    await onDisconnect.waitForCallCount(1)
+    expect(es.readyState, 'readyState').toBe(CLOSED) // `onDisconnect` called first, closes ES.
+
+    // After 50 ms, we should still be in closing state - no reconnecting
+    expect(es.readyState, 'readyState').toBe(CLOSED)
+
+    // After 500 ms, there should be no clients connected to the given ID
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(es.readyState, 'readyState').toBe(CLOSED)
+
+    // Wait another 500 ms, just to be sure there are no slow reconnects
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(await request(url).then((res) => res.json())).toMatchObject({numListeners: 0})
+    expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
   test('can use async iterator, reconnects transparently', async () => {
@@ -211,19 +247,19 @@ export function registerTests(options: {
     })
 
     // Connecting
-    expect(es.readyState).toBe(CONNECTING)
+    expect(es.readyState, 'readyState').toBe(CONNECTING)
 
     // Connected
     await onConnect.waitForCallCount(1)
-    expect(es.readyState).toBe(OPEN)
+    expect(es.readyState, 'readyState').toBe(OPEN)
 
     // Disconnected
     await onDisconnect.waitForCallCount(1)
-    expect(es.readyState).toBe(CONNECTING)
+    expect(es.readyState, 'readyState').toBe(CONNECTING)
 
     // Closed
     await es.close()
-    expect(es.readyState).toBe(CLOSED)
+    expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
   test('calling connect while already connected does nothing', async () => {
@@ -287,7 +323,7 @@ export function registerTests(options: {
     await onMessage.waitForCallCount(1)
 
     expect(es.lastEventId).toBe('prct-100')
-    expect(es.readyState).toBe(CLOSED) // CLOSED
+    expect(es.readyState, 'readyState').toBe(CLOSED) // CLOSED
     expect(onMessage.callCount).toBe(1)
     expect(onMessage.lastCall.lastArg).toMatchObject({
       data: '100%',

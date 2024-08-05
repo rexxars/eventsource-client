@@ -219,12 +219,14 @@ export function createEventSource(
       request = null
       parser.reset()
 
-      onDisconnect()
-
       // EventSources never close unless explicitly handled with `.close()`:
       // Implementors should send an `done`/`complete`/`disconnect` event and
       // explicitly handle it in client code, or send an HTTP 204.
       scheduleReconnect()
+
+      // Calling scheduleReconnect() prior to onDisconnect() allows consumers to
+      // explicitly call .close() before the reconnection is performed.
+      onDisconnect()
     } while (open)
   }
 
