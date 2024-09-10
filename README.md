@@ -35,12 +35,12 @@ npm install --save eventsource-client
 - Firefox >= 65
 - Edge >= 79
 - Deno >= 1.30
-- _Partial:_ Bun (has [issues with unicode](https://github.com/oven-sh/bun/issues/5542))
+- Bun >= 1.1.23
 
 Basically, any environment that supports:
 
 - [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
-- [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder) with `stream` option
+- [TextDecoderStream](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoderStream)
 - [Symbol.asyncIterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator)
 
 ## Usage (async iterator)
