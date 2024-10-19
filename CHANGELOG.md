@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.3](https://github.com/rexxars/eventsource-client/compare/v1.1.2...v1.1.3) (2024-10-19)
+
+### Bug Fixes
+
+- upgrade to eventsource-parser v3 ([#5](https://github.com/rexxars/eventsource-client/issues/5)) ([08087f7](https://github.com/rexxars/eventsource-client/commit/08087f79d0e12523a8434ff9da5533dd1d6b75bf))
+
 ## [1.1.2](https://github.com/rexxars/eventsource-client/compare/v1.1.1...v1.1.2) (2024-08-05)
 
 ### Bug Fixes
