@@ -63,7 +63,7 @@
     "edge >= 79"
   ],
   "dependencies": {
-    "eventsource-parser": "^2.0.0"
+    "eventsource-parser": "^3.0.0"
   },
   "devDependencies": {
     "@sanity/pkg-utils": "^4.0.0",
