@@ -1,5 +1,7 @@
 import type {ReadableStream as NodeWebReadableStream} from 'node:stream/web'
 
+import type {EventSourceMessage} from 'eventsource-parser'
+
 /**
  * Ready state for a connection.
  *
@@ -91,22 +93,6 @@ export interface EventSourceOptions {
 }
 
 /**
- * A message received from the server.
- *
- * @public
- */
-export interface EventSourceMessage {
-  /** The data received for this message. */
-  data: string
-
-  /** Event name sent from the server, or `undefined` if none is set for this message. */
-  event?: string
-
-  /** ID of the message, if any was provided by the server. */
-  id?: string
-}
-
-/**
  * Stripped down version of `fetch()`, only defining the parts we care about.
  * This ensures it should work with "most" fetch implementations.
  *
@@ -165,3 +151,8 @@ export interface FetchLikeResponse {
   readonly status: number
   readonly redirected: boolean
 }
+
+/**
+ * Re-export of `EventSourceMessage` from `eventsource-parser`.
+ */
+export {EventSourceMessage}

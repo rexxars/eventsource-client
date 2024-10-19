@@ -1,4 +1,4 @@
-import {createParser, type ParseEvent} from 'eventsource-parser'
+import {createParser} from 'eventsource-parser'
 
 import type {EnvAbstractions, EventSourceAsyncValueResolver} from './abstractions.js'
 import {CLOSED, CONNECTING, OPEN} from './constants.js'
@@ -43,7 +43,7 @@ export function createEventSource(
   const onCloseSubscribers: (() => void)[] = []
   const subscribers: ((event: EventSourceMessage) => void)[] = onMessage ? [onMessage] : []
   const emit = (event: EventSourceMessage) => subscribers.forEach((fn) => fn(event))
-  const parser = createParser(onParsedMessage)
+  const parser = createParser({onEvent, onRetry})
 
   // Client state
   let request: Promise<unknown> | null
@@ -230,21 +230,16 @@ export function createEventSource(
     } while (open)
   }
 
-  function onParsedMessage(msg: ParseEvent): void {
-    if (msg.type === 'reconnect-interval') {
-      reconnectMs = msg.value
-      return
-    }
-
+  function onEvent(msg: EventSourceMessage) {
     if (typeof msg.id === 'string') {
       lastEventId = msg.id
     }
 
-    emit({
-      id: msg.id,
-      data: msg.data,
-      event: msg.event,
-    })
+    emit(msg)
+  }
+
+  function onRetry(ms: number) {
+    reconnectMs = ms
   }
 
   function getRequestOptions(): FetchLikeInit {
