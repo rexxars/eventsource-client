@@ -299,7 +299,7 @@ async function writeTricklingConnection(_req: IncomingMessage, res: ServerRespon
 
   for (let i = 0; i < 60; i++) {
     await delay(500)
-    tryWrite(res, ':\n')
+    tryWrite(res, formatComment(`This is comment #${i + 1}`))
   }
 
   tryWrite(res, formatEvent({event: 'disconnect', data: 'Thanks for listening'}))
