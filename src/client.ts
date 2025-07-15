@@ -90,7 +90,7 @@ export function createEventSource(
         request = null
 
         // We expect abort errors when the user manually calls `close()` - ignore those
-        if (err.name === 'AbortError' || err.type === 'aborted') {
+        if (err.name === 'AbortError' || err.type === 'aborted' || controller.signal.aborted) {
           return
         }
 
