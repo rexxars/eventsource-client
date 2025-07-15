@@ -7,6 +7,7 @@ import esbuild from 'esbuild'
 
 import {unicodeLines} from './fixtures.js'
 
+const dirname = new URL('.', import.meta.url).pathname
 const isDeno = typeof globalThis.Deno !== 'undefined'
 /* {[client id]: number of connects} */
 const connectCounts = new Map<string, number>()
@@ -419,7 +420,7 @@ function writeBrowserTestPage(_req: IncomingMessage, res: ServerResponse) {
     Connection: 'close',
   })
 
-  createReadStream(resolvePath(__dirname, './browser/browser-test.html')).pipe(res)
+  createReadStream(resolvePath(dirname, './browser/browser-test.html')).pipe(res)
 }
 
 async function writeBrowserTestScript(_req: IncomingMessage, res: ServerResponse) {
@@ -432,7 +433,7 @@ async function writeBrowserTestScript(_req: IncomingMessage, res: ServerResponse
   const build = await esbuild.build({
     bundle: true,
     target: ['chrome71', 'edge79', 'firefox105', 'safari14.1'],
-    entryPoints: [resolvePath(__dirname, './browser/browser-test.ts')],
+    entryPoints: [resolvePath(dirname, './browser/browser-test.ts')],
     sourcemap: 'inline',
     write: false,
     outdir: 'out',
@@ -442,7 +443,7 @@ async function writeBrowserTestScript(_req: IncomingMessage, res: ServerResponse
   res.end()
 }
 
-function delay(ms: number): Promise<void> {
+function delay(ms: number): Promise {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
