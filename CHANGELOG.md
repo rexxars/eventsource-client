@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/rexxars/eventsource-client/compare/v1.1.3...v1.1.4) (2025-07-15)
+
+### Bug Fixes
+
+- check if AbortController is aborted before scheduling reconnect ([#15](https://github.com/rexxars/eventsource-client/issues/15)) ([a8b098a](https://github.com/rexxars/eventsource-client/commit/a8b098aeae612683ec28e5597174b54c8b606e32))
+
 ## [1.1.3](https://github.com/rexxars/eventsource-client/compare/v1.1.2...v1.1.3) (2024-10-19)
 
 ### Bug Fixes
