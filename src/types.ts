@@ -49,6 +49,9 @@ export interface EventSourceOptions {
   /** Callback that fires each time a new event is received. */
   onMessage?: (event: EventSourceMessage) => void
 
+  /** A boolean for whether comments should also fire as messages (default is to ignore) */
+  withComments?: boolean
+
   /** Callback that fires each time the connection is established (multiple times in the case of reconnects). */
   onConnect?: () => void
 

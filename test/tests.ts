@@ -42,6 +42,29 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('can receive comments', async () => {
+    const onMessage = getCallCounter()
+    const onDisconnect = getCallCounter()
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/trickle`),
+      fetch,
+      onMessage,
+      onDisconnect,
+      withComments: true,
+    })
+
+    await onMessage.waitForCallCount(2)
+
+    expect(onMessage.callCount).toBe(2)
+    expect(onMessage.lastCall.lastArg).toMatchObject({
+      data: 'This is comment #1',
+      event: 'comment',
+      id: undefined,
+    })
+
+    await deferClose(es)
+  })
+
   test('can connect using URL only', async () => {
     const es = createEventSource(new URL(`${baseUrl}:${port}/`))
     for await (const event of es) {
