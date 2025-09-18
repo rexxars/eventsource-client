@@ -175,7 +175,7 @@ export function registerTests(options: {
 
     // Wait until onDisconnect has been called (server closed connection)
     await onDisconnect.waitForCallCount(1)
-  
+
     // Wait until onScheduleReconnect has been called where we call es.close()
     await onScheduleReconnect.waitForCallCount(1)
 
