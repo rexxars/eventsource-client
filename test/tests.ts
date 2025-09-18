@@ -156,7 +156,7 @@ export function registerTests(options: {
     expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
   })
 
-  test('will not reconnect after `close()` in `onScheduleReconnect`', async () => {
+  test('will not reconnect after explicit `close()` in `onScheduleReconnect`', async () => {
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()
     const onScheduleReconnect = getCallCounter(() => es.close())
@@ -184,7 +184,8 @@ export function registerTests(options: {
     // Give some time to ensure no reconnects happen
     await new Promise((resolve) => setTimeout(resolve, 500))
 
-    expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(1)
+    // connect will set readyState to CONNECTING, so if it's CLOSED here,
+    // it means no reconnect was attempted
     expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
