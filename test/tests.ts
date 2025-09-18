@@ -11,7 +11,7 @@ export function registerTests(options: {
   createEventSource: typeof CreateEventSourceFn
   fetch?: typeof fetch
 }): TestRunner {
-  const { createEventSource, port, fetch, runner, environment } = options
+  const {createEventSource, port, fetch, runner, environment} = options
 
   // eslint-disable-next-line no-empty-function
   const browserTest = environment === 'browser' ? runner.registerTest : function noop() {}

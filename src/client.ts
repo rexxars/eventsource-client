@@ -169,8 +169,10 @@ export function createEventSource(
 
   function scheduleReconnect() {
     onScheduleReconnect({delay: reconnectMs})
-    readyState = CONNECTING
     if (controller.signal.aborted) {
+      return
+    }
+    readyState = CONNECTING
     reconnectTimer = setTimeout(connect, reconnectMs)
   }
 
