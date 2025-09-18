@@ -1,8 +1,8 @@
-import { CLOSED, CONNECTING, OPEN } from '../src/constants.js'
-import type { createEventSource as CreateEventSourceFn, EventSourceMessage } from '../src/default.js'
-import { unicodeLines } from './fixtures.js'
-import { deferClose, expect, getCallCounter } from './helpers.js'
-import type { TestRunner } from './waffletest/index.js'
+import {CLOSED, CONNECTING, OPEN} from '../src/constants.js'
+import type {createEventSource as CreateEventSourceFn, EventSourceMessage} from '../src/default.js'
+import {unicodeLines} from './fixtures.js'
+import {deferClose, expect, getCallCounter} from './helpers.js'
+import type {TestRunner} from './waffletest/index.js'
 
 export function registerTests(options: {
   environment: string
@@ -14,7 +14,7 @@ export function registerTests(options: {
   const { createEventSource, port, fetch, runner, environment } = options
 
   // eslint-disable-next-line no-empty-function
-  const browserTest = environment === 'browser' ? runner.registerTest : function noop() { }
+  const browserTest = environment === 'browser' ? runner.registerTest : function noop() {}
   const test = runner.registerTest
 
   const baseUrl =
@@ -45,7 +45,7 @@ export function registerTests(options: {
   test('can connect using URL only', async () => {
     const es = createEventSource(new URL(`${baseUrl}:${port}/`))
     for await (const event of es) {
-      expect(event).toMatchObject({ event: 'welcome' })
+      expect(event).toMatchObject({event: 'welcome'})
       await deferClose(es)
     }
   })
@@ -53,7 +53,7 @@ export function registerTests(options: {
   test('can connect using URL string only', async () => {
     const es = createEventSource(`${baseUrl}:${port}/`)
     for await (const event of es) {
-      expect(event).toMatchObject({ event: 'welcome' })
+      expect(event).toMatchObject({event: 'welcome'})
       await deferClose(es)
     }
   })
@@ -135,7 +135,7 @@ export function registerTests(options: {
 
     // Should receive a message containing the number of listeners on the given ID
     await onMessage.waitForCallCount(1)
-    expect(onMessage.lastCall.lastArg).toMatchObject({ data: '1' })
+    expect(onMessage.lastCall.lastArg).toMatchObject({data: '1'})
     expect(es.readyState, 'readyState').toBe(OPEN) // Open (connected)
 
     // Explicitly disconnect. Should normally reconnect within ~250ms (server sends retry: 250)
@@ -147,11 +147,11 @@ export function registerTests(options: {
 
     // After 500 ms, there should still only be a single connect with this client ID
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({ clientIdConnects: 1 })
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
 
     // Wait another 500 ms, just to be sure there are no slow reconnects
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({ clientIdConnects: 1 })
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
 
     expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
   })
@@ -205,7 +205,7 @@ export function registerTests(options: {
 
     // Should receive a message containing the number of listeners on the given ID
     await onMessage.waitForCallCount(1)
-    expect(onMessage.lastCall.lastArg, 'onMessage `event` argument').toMatchObject({ data: '1' })
+    expect(onMessage.lastCall.lastArg, 'onMessage `event` argument').toMatchObject({data: '1'})
     expect(es.readyState, 'readyState').toBe(OPEN) // Open (connected)
 
     await onDisconnect.waitForCallCount(1)
@@ -216,12 +216,12 @@ export function registerTests(options: {
 
     // After 500 ms, there should be no clients connected to the given ID
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({ clientIdConnects: 1 })
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
     expect(es.readyState, 'readyState').toBe(CLOSED)
 
     // Wait another 500 ms, just to be sure there are no slow reconnects
     await new Promise((resolve) => setTimeout(resolve, 500))
-    expect(await request(url).then((res) => res.json())).toMatchObject({ clientIdConnects: 1 })
+    expect(await request(url).then((res) => res.json())).toMatchObject({clientIdConnects: 1})
     expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
@@ -258,7 +258,7 @@ export function registerTests(options: {
     })
 
     let hasSeenMessage = false
-    for await (const { event } of es) {
+    for await (const {event} of es) {
       hasSeenMessage = true
       expect(event).toBe('counter')
       es.close()
@@ -374,7 +374,7 @@ export function registerTests(options: {
       url: new URL(`${baseUrl}:${port}/debug`),
       method: 'POST',
       body: 'Blåbærsyltetøy, rømme og brunost på vaffel',
-      headers: { 'Content-Type': 'text/norwegian-plain; charset=utf-8' },
+      headers: {'Content-Type': 'text/norwegian-plain; charset=utf-8'},
       fetch,
       onMessage,
     })
@@ -388,7 +388,7 @@ export function registerTests(options: {
     const data = JSON.parse(lastMessage.data)
     expect(data.method).toBe('POST')
     expect(data.bodyHash).toBe('5f4e50479bfc5ccdb6f865cc3341245dde9e81aa2f36b0c80e3fcbcfbeccaeda')
-    expect(data.headers).toMatchObject({ 'content-type': 'text/norwegian-plain; charset=utf-8' })
+    expect(data.headers).toMatchObject({'content-type': 'text/norwegian-plain; charset=utf-8'})
 
     await deferClose(es)
   })
@@ -458,22 +458,22 @@ export function registerTests(options: {
     async () => {
       // Ideally this would be done through playwright, but can't get it working,
       // so let's just fire off a request that sets the cookies for now
-      const { cookiesWritten } = await globalThis.fetch('/set-cookie').then((res) => res.json())
+      const {cookiesWritten} = await globalThis.fetch('/set-cookie').then((res) => res.json())
       expect(cookiesWritten).toBe(true)
 
-      let es = createEventSource({ url: '/authed', fetch, credentials: 'include' })
+      let es = createEventSource({url: '/authed', fetch, credentials: 'include'})
       for await (const event of es) {
         expect(event.event).toBe('authInfo')
-        expect(JSON.parse(event.data)).toMatchObject({ cookies: 'someSession=someValue' })
+        expect(JSON.parse(event.data)).toMatchObject({cookies: 'someSession=someValue'})
         break
       }
 
       await deferClose(es)
 
-      es = createEventSource({ url: '/authed', fetch, credentials: 'omit' })
+      es = createEventSource({url: '/authed', fetch, credentials: 'omit'})
       for await (const event of es) {
         expect(event.event).toBe('authInfo')
-        expect(JSON.parse(event.data)).toMatchObject({ cookies: '' })
+        expect(JSON.parse(event.data)).toMatchObject({cookies: ''})
         break
       }
     },
