@@ -156,6 +156,39 @@ export function registerTests(options: {
     expect(onScheduleReconnect.callCount, 'onScheduleReconnect call count').toBe(0)
   })
 
+  test('will not reconnect after explicit `close()` in `onScheduleReconnect`', async () => {
+    const onMessage = getCallCounter()
+    const onDisconnect = getCallCounter()
+    const onScheduleReconnect = getCallCounter(() => es.close())
+
+    const url = `${baseUrl}:${port}/counter`
+    const es = createEventSource({
+      url,
+      fetch,
+      onMessage,
+      onDisconnect,
+      onScheduleReconnect,
+    })
+
+    // Wait until first batch of messages is received (3 messages before server disconnects)
+    await onMessage.waitForCallCount(3)
+
+    // Wait until onDisconnect has been called (server closed connection)
+    await onDisconnect.waitForCallCount(1)
+  
+    // Wait until onScheduleReconnect has been called where we call es.close()
+    await onScheduleReconnect.waitForCallCount(1)
+
+    expect(es.readyState, 'readyState').toBe(CLOSED)
+
+    // Give some time to ensure no reconnects happen
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    // connect will set readyState to CONNECTING, so if it's CLOSED here,
+    // it means no reconnect was attempted
+    expect(es.readyState, 'readyState').toBe(CLOSED)
+  })
+
   test('will not reconnect after explicit `close()` in `onDisconnect`', async () => {
     const request = fetch || globalThis.fetch
     const onMessage = getCallCounter()
