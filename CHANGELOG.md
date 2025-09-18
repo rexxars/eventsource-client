@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.5](https://github.com/rexxars/eventsource-client/compare/v1.1.4...v1.1.5) (2025-09-18)
+
+### Bug Fixes
+
+- prevent reconnect if `close()` is called in `onScheduleReconnect` handler ([#19](https://github.com/rexxars/eventsource-client/issues/19)) ([8db946b](https://github.com/rexxars/eventsource-client/commit/8db946bdb8dac12d3eb2cf2c0a5fbc1b94324cc1))
+
 ## [1.1.4](https://github.com/rexxars/eventsource-client/compare/v1.1.3...v1.1.4) (2025-07-15)
 
 ### Bug Fixes
