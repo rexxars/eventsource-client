@@ -36,14 +36,20 @@ export function createEventSource(
     typeof optionsOrUrl === 'string' || optionsOrUrl instanceof URL
       ? {url: optionsOrUrl}
       : optionsOrUrl
-  const {onMessage, onConnect = noop, onDisconnect = noop, onScheduleReconnect = noop} = options
+  const {
+    onMessage,
+    onComment = noop,
+    onConnect = noop,
+    onDisconnect = noop,
+    onScheduleReconnect = noop,
+  } = options
   const {fetch, url, initialLastEventId} = validate(options)
   const requestHeaders = {...options.headers} // Prevent post-creation mutations to headers
 
   const onCloseSubscribers: (() => void)[] = []
   const subscribers: ((event: EventSourceMessage) => void)[] = onMessage ? [onMessage] : []
   const emit = (event: EventSourceMessage) => subscribers.forEach((fn) => fn(event))
-  const parser = createParser({onEvent, onRetry})
+  const parser = createParser({onEvent, onRetry, onComment})
 
   // Client state
   let request: Promise<unknown> | null

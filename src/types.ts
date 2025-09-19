@@ -58,6 +58,10 @@ export interface EventSourceOptions {
   /** Callback that fires each time the connection is broken (will still attempt to reconnect, unless `close()` is called). */
   onDisconnect?: () => void
 
+  /** Callback that fires each time a comment is received. One leading space is trimmed
+   * if present. */
+  onComment?: (comment: string) => void
+
   /** A string to use for the initial `Last-Event-ID` header when connecting. Only used until the first message with a new ID is received. */
   initialLastEventId?: string
 

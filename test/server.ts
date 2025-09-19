@@ -125,7 +125,7 @@ async function writeHeartbeatSeparated(_req: IncomingMessage, res: ServerRespons
 
   for (let i = 0; i < 10; i++) {
     tryWrite(res, formatEvent({event: 'ping', data: `Ping ${i + 1} of 10`}))
-    tryWrite(res, formatComment(' ❤️'))
+    tryWrite(res, formatComment(i % 2 === 0 ? '❤️' : ' 💚'))
     await delay(5)
   }
 

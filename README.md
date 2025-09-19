@@ -107,6 +107,22 @@ for await (const {data} of es) {
 }
 ```
 
+## Comments
+
+Should you need to read/respond to comments, pass an `onComment` callback:
+
+```ts
+import {createEventSource} from 'eventsource-client'
+
+const es = createEventSource({
+  url: 'https://my-server.com/sse',
+  onComment: (comment: string) => {
+    /* a single, leading space will be trimmed if present */
+    /* eg `: hello` and `:hello` will both yield `hello` */
+  },
+})
+```
+
 ## Todo
 
 - [ ] Figure out what to do on broken connection on request body

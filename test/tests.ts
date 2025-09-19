@@ -121,6 +121,21 @@ export function registerTests(options: {
     await messageCounter.waitForCallCount(10)
   })
 
+  test('will call `onComment` with comments, if provided', async () => {
+    const onComment = getCallCounter()
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/heartbeats`),
+      fetch,
+      onComment,
+    })
+
+    await onComment.waitForCallCount(5)
+    expect(onComment.firstCall.lastArg).toBe('❤️')
+    expect(onComment.secondCall.lastArg).toBe('💚')
+
+    await deferClose(es)
+  })
+
   test('will reconnect with last received message id if server disconnects', async () => {
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()
