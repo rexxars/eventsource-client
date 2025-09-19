@@ -5,6 +5,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.0](https://github.com/rexxars/eventsource-client/compare/v1.1.5...v1.2.0) (2025-09-19)
+
+### Features
+
+- support `onComment` callback ([8fdfe0b](https://github.com/rexxars/eventsource-client/commit/8fdfe0b2839253da775a8892589dfe5af0623f5a))
+
 ## [1.1.5](https://github.com/rexxars/eventsource-client/compare/v1.1.4...v1.1.5) (2025-09-18)
 
 ### Bug Fixes
