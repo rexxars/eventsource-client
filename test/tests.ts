@@ -83,6 +83,44 @@ export function registerTests(options: {
     await deferClose(es)
   })
 
+  test('will skip over comments (iterator)', async () => {
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/heartbeats`),
+      fetch,
+    })
+
+    let counter = 0
+    for await (const event of es) {
+      expect(event.event).toBe('ping')
+      expect(event.data).toBe(`Ping ${++counter} of 10`)
+
+      if (counter === 10) {
+        break
+      }
+    }
+
+    await deferClose(es)
+  })
+
+  test('will skip over comments (onMessage)', async () => {
+    const messageCounter = getCallCounter()
+    const onDisconnect = getCallCounter()
+    let counter = 0
+    const es = createEventSource({
+      url: new URL(`${baseUrl}:${port}/heartbeats`),
+      fetch,
+      onMessage: (event) => {
+        messageCounter()
+        expect(event.event).toBe('ping')
+        expect(event.data).toBe(`Ping ${++counter} of 10`)
+        if (counter === 10) es.close()
+      },
+      onDisconnect,
+    })
+
+    await messageCounter.waitForCallCount(10)
+  })
+
   test('will reconnect with last received message id if server disconnects', async () => {
     const onMessage = getCallCounter()
     const onDisconnect = getCallCounter()

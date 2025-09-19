@@ -34,6 +34,8 @@ function onRequest(req: IncomingMessage, res: ServerResponse) {
       return writeCounter(req, res)
     case '/identified':
       return writeIdentifiedListeners(req, res)
+    case '/heartbeats':
+      return writeHeartbeatSeparated(req, res)
     case '/end-after-one':
       return writeOne(req, res)
     case '/slow-connect':
@@ -109,6 +111,22 @@ async function writeCounter(req: IncomingMessage, res: ServerResponse) {
       }),
     )
     await delay(25)
+  }
+
+  res.end()
+}
+
+async function writeHeartbeatSeparated(_req: IncomingMessage, res: ServerResponse) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  })
+
+  for (let i = 0; i < 10; i++) {
+    tryWrite(res, formatEvent({event: 'ping', data: `Ping ${i + 1} of 10`}))
+    tryWrite(res, formatComment(' ❤️'))
+    await delay(5)
   }
 
   res.end()
