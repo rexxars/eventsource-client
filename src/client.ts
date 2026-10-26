@@ -109,12 +109,14 @@ export function createEventSource(
     controller.abort()
     parser.reset()
     clearTimeout(reconnectTimer)
-    onCloseSubscribers.forEach((fn) => fn())
+    // Each iterator removes its close handler while unsubscribing.
+    onCloseSubscribers.slice().forEach((fn) => fn())
   }
 
   function getEventIterator(): AsyncGenerator<EventSourceMessage, void> {
     const pullQueue: EventSourceAsyncValueResolver[] = []
     const pushQueue: EventSourceMessage[] = []
+    let finished = false
 
     function pullValue() {
       return new Promise<IteratorResult<EventSourceMessage, void>>((resolve) => {
@@ -137,27 +139,25 @@ export function createEventSource(
     }
 
     function unsubscribe() {
-      subscribers.splice(subscribers.indexOf(pushValue), 1)
-      while (pullQueue.shift()) {}
-      while (pushQueue.shift()) {}
-    }
-
-    function onClose() {
-      const resolve = pullQueue.shift()
-      if (!resolve) {
+      if (finished) {
         return
       }
 
-      resolve({done: true, value: undefined})
-      unsubscribe()
+      finished = true
+      subscribers.splice(subscribers.indexOf(pushValue), 1)
+      onCloseSubscribers.splice(onCloseSubscribers.indexOf(unsubscribe), 1)
+      for (const resolve of pullQueue.splice(0)) {
+        resolve({done: true, value: undefined})
+      }
+      pushQueue.length = 0
     }
 
-    onCloseSubscribers.push(onClose)
+    onCloseSubscribers.push(unsubscribe)
     subscribers.push(pushValue)
 
     return {
       next() {
-        return readyState === CLOSED ? this.return() : pullValue()
+        return finished || readyState === CLOSED ? this.return() : pullValue()
       },
       return() {
         unsubscribe()

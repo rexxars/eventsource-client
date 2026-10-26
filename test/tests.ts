@@ -350,6 +350,172 @@ export function registerTests(options: {
     expect(es.readyState, 'readyState').toBe(CLOSED)
   })
 
+  for (const exit of ['return', 'throw', 'close'] as const) {
+    for (const pendingCount of [0, 1, 3]) {
+      test(`iterator ${exit} settles ${pendingCount} pending reads and stays done`, async () => {
+        const es = createEventSource({url: `${baseUrl}:${port}/`, fetch})
+        const iterator = es[Symbol.asyncIterator]()
+        try {
+          expect((await iterator.next()).value.event).toBe('welcome')
+          const results: IteratorResult<EventSourceMessage>[] = []
+          for (let i = 0; i < pendingCount; i++) {
+            iterator.next().then((result) => results.push(result))
+          }
+
+          if (exit === 'close') {
+            es.close()
+          } else if (exit === 'return') {
+            expect(await iterator.return?.()).toMatchObject({done: true, value: undefined})
+          } else {
+            const error = new Error('consumer stopped')
+            expect(await iterator.throw?.(error).catch((err) => err)).toBe(error)
+          }
+          // Observe promises settled by the synchronous cleanup, without waiting for more input.
+          await Promise.resolve()
+          expect(results.length).toBe(pendingCount)
+          results.forEach((result) => expect(result).toMatchObject({done: true, value: undefined}))
+
+          const after: IteratorResult<EventSourceMessage>[] = []
+          iterator.next().then((result) => after.push(result))
+          await Promise.resolve()
+          expect(after.length).toBe(1)
+          expect(after[0]).toMatchObject({done: true, value: undefined})
+          if (exit !== 'close') expect(es.readyState).toBe(OPEN)
+        } finally {
+          es.close()
+        }
+      })
+    }
+
+    test(`repeated iterator ${exit} does not remove another subscriber`, async () => {
+      const onMessage = getCallCounter()
+      const es = createEventSource({url: `${baseUrl}:${port}/`, fetch, onMessage})
+      const first = es[Symbol.asyncIterator]()
+      const second = es[Symbol.asyncIterator]()
+      const received: EventSourceMessage[] = []
+      second.next().then(({value, done}) => {
+        if (!done) received.push(value)
+      })
+      try {
+        // For close, repeatedly finish the first iterator before closing the source below.
+        for (let i = 0; i < 2; i++) {
+          if (exit === 'throw') {
+            const error = new Error('consumer stopped')
+            expect(await first.throw?.(error).catch((err) => err)).toBe(error)
+          } else {
+            await first.return?.()
+          }
+        }
+        await onMessage.waitForCallCount(1)
+        await Promise.resolve()
+        expect(received.length).toBe(1)
+        expect(received[0].event).toBe('welcome')
+        expect(es.readyState).toBe(OPEN)
+        if (exit === 'close') {
+          const ended: IteratorResult<EventSourceMessage>[] = []
+          second.next().then((result) => ended.push(result))
+          es.close()
+          es.close()
+          await Promise.resolve()
+          expect(ended.length).toBe(1)
+          expect(ended[0]).toMatchObject({done: true, value: undefined})
+        }
+      } finally {
+        es.close()
+      }
+    })
+
+    test(`iterator ${exit} discards buffered messages`, async () => {
+      const onMessage = getCallCounter()
+      const es = createEventSource({url: `${baseUrl}:${port}/`, fetch, onMessage})
+      const iterator = es[Symbol.asyncIterator]()
+      try {
+        await onMessage.waitForCallCount(1)
+        if (exit === 'close') {
+          es.close()
+        } else if (exit === 'throw') {
+          const error = new Error('consumer stopped')
+          expect(await iterator.throw?.(error).catch((err) => err)).toBe(error)
+        } else {
+          await iterator.return?.()
+        }
+        const results: IteratorResult<EventSourceMessage>[] = []
+        iterator.next().then((result) => results.push(result))
+        await Promise.resolve()
+        expect(results.length).toBe(1)
+        expect(results[0]).toMatchObject({done: true, value: undefined})
+      } finally {
+        es.close()
+      }
+    })
+  }
+
+  test('close settles all subscribers, including those without pending reads', async () => {
+    const onMessage = getCallCounter()
+    const es = createEventSource({url: `${baseUrl}:${port}/`, fetch, onMessage})
+    const iterators = Array.from({length: 4}, () => es[Symbol.asyncIterator]())
+    try {
+      await onMessage.waitForCallCount(1)
+      const results: IteratorResult<EventSourceMessage>[] = []
+      for (const iterator of iterators.slice(1)) {
+        await iterator.next()
+        for (let i = 0; i < 3; i++) {
+          iterator.next().then((result) => results.push(result))
+        }
+      }
+      es.close()
+      es.close()
+      await Promise.resolve()
+      expect(results.length).toBe(9)
+      results.forEach((result) => expect(result).toMatchObject({done: true, value: undefined}))
+      for (const iterator of iterators) {
+        expect(await iterator.next()).toMatchObject({done: true, value: undefined})
+      }
+    } finally {
+      es.close()
+    }
+  })
+
+  test('breaking one iterator leaves other subscribers and callbacks connected', async () => {
+    const onMessage = getCallCounter()
+    const es = createEventSource({url: `${baseUrl}:${port}/counter`, fetch, onMessage})
+    const other = es[Symbol.asyncIterator]()
+    try {
+      for await (const message of es) {
+        expect(message.id).toBe('1')
+        break
+      }
+      expect((await other.next()).value.id).toBe('1')
+      expect((await other.next()).value.id).toBe('2')
+      expect(onMessage.callCount).toBe(2)
+      expect(es.readyState).toBe(OPEN)
+    } finally {
+      es.close()
+    }
+  })
+
+  test('closed iterators stay done when the source reconnects with a new subscriber', async () => {
+    let fresh: AsyncIterableIterator<EventSourceMessage> | undefined
+    const onDisconnect = getCallCounter(({numCalls}) => {
+      if (numCalls === 1) {
+        es.close()
+        fresh = es[Symbol.asyncIterator]()
+        es.connect()
+      }
+    })
+    const es = createEventSource({url: `${baseUrl}:${port}/counter`, fetch, onDisconnect})
+    const old = es[Symbol.asyncIterator]()
+    try {
+      // Leave the first connection's messages buffered in the old iterator.
+      await onDisconnect.waitForCallCount(1)
+      expect((await fresh?.next())?.value.id).toBe('4')
+      expect(es.readyState).toBe(OPEN)
+      expect(await old.next()).toMatchObject({done: true, value: undefined})
+    } finally {
+      es.close()
+    }
+  })
+
   test('calling connect while already connected does nothing', async () => {
     const onMessage = getCallCounter()
     const es = createEventSource({

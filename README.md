@@ -71,6 +71,12 @@ for await (const {data, event, id} of es) {
 es.close()
 ```
 
+Calling an iterator's `return()` or `throw(error)` ends only that iterator, leaving other
+iterators and the connection active. Pending and subsequent `next()` calls finish with
+`done: true`, and buffered messages are discarded. `throw(error)` itself rejects with the
+supplied error. Calling `es.close()` ends all current iterators; reconnecting does not
+restart them, so create a new iterator to receive messages after reconnecting.
+
 ## Usage (`onMessage` callback)
 
 ```ts
