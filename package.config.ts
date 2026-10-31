@@ -11,17 +11,15 @@ export default defineConfig({
     },
   },
 
-  legacyExports: true,
-
   bundles: [
     {
       source: './src/default.ts',
-      require: './dist/default.js',
+      import: './dist/default.js',
       runtime: 'browser',
     },
     {
       source: './src/node.ts',
-      require: './dist/node.js',
+      import: './dist/node.js',
       runtime: 'node',
     },
   ],
